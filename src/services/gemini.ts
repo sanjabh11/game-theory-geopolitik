@@ -19,7 +19,7 @@ import {
 
 // Gemini API configuration
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDmpYnphVeUXH1v4NUyhR47Jx61zIU3GYQ';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDmpYnphVeUXH1v4 zIU3GYQ';
 
 interface GeminiRequest {
   contents: Array<{
