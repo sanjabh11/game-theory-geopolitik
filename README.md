@@ -2,7 +2,11 @@
 
 A comprehensive platform for geopolitical analysis, strategic modeling, and crisis monitoring using game theory principles and AI-powered insights.
 
-## 🚀 Features
+## 🚀 New Features & Enhancements
+
+1. **Responsive Design & Dark Mode**
+- Fully responsive UI with mobile optimization and dark mode support.
+- Enhanced transitions and animations using Framer Motion.
 
 ### Core Functionality
 
@@ -54,7 +58,7 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
 - **React 18** with TypeScript for type safety
 - **Vite** for fast development and optimized builds
 - **Tailwind CSS** for responsive, modern styling
-- **Framer Motion** for smooth animations
+- **Framer Motion** for smooth animations and interactions
 - **React Router** for client-side navigation
 - **React Query** for efficient data fetching and caching
 - **React Hot Toast** for user notifications
