@@ -18,7 +18,7 @@ import {
 } from '../types';
 
 // Gemini API configuration
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!GEMINI_API_KEY) {
@@ -467,7 +467,7 @@ Return ONLY valid JSON:
   // Predictive Analytics
   async generatePredictions(request: PredictiveRequest): Promise<PredictiveAnalytics> {
     const prompt = `
-You are a Quantitative Geopolitical Analytics AI specializing in predictive modeling.
+You are a Quantitative Geopolitical Analytics AI. Generate predictions using time series analysis, machine learning ensemble methods, and Bayesian updating to provide probability forecasts with confidence intervals and market impact assessments.
 
 Generate predictions for:
 Metrics: ${request.metrics.join(', ')}
@@ -482,12 +482,6 @@ Provide comprehensive predictive analysis:
 4. Risk-adjusted return predictions
 5. Correlation matrix for different events
 6. Scenario analysis (best/worst/base case)
-
-Use quantitative methods:
-- Time series analysis with external factors
-- Machine learning ensemble methods
-- Bayesian updating with new information
-- Causal inference techniques
 
 Return ONLY valid JSON:
 {
@@ -638,7 +632,7 @@ Return ONLY valid JSON:
   "recommendations": ["string array - response options"]
 }`;
 
-    const response = await this.callGeminiAPI(prompt, { temperature: 0.3 });
+    const response = await this.callGeminiAPI(prompt);
     return JSON.parse(response);
   }
 
