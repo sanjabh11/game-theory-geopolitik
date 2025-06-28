@@ -53,6 +53,18 @@ const navigation = [
     description: 'Analyze geopolitical risks'
   },
   { 
+    name: 'Mental Model Advisor', 
+    href: '/mental-model-advisor', 
+    icon: LightBulbIcon,
+    description: 'AI-powered decision frameworks'
+  },
+  { 
+    name: 'Model Library', 
+    href: '/model-library', 
+    icon: BookmarkIcon,
+    description: 'Explore mental models'
+  },
+  { 
     name: 'Simulation', 
     href: '/simulation', 
     icon: CpuChipIcon,
@@ -75,18 +87,6 @@ const navigation = [
     href: '/collaboration', 
     icon: DocumentTextIcon,
     description: 'Team workspace'
-  },
-  { 
-    name: 'Mental Model Advisor', 
-    href: '/mental-model-advisor', 
-    icon: LightBulbIcon,
-    description: 'AI-powered decision support'
-  },
-  { 
-    name: 'Model Library', 
-    href: '/model-library', 
-    icon: BookmarkIcon,
-    description: 'Browse mental models'
   },
 ];
 

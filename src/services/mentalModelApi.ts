@@ -3,7 +3,7 @@ import { ApiResponse } from '../types/api';
 interface MentalModel {
   id: string;
   name: string;
-  category: string;
+  category: 'cognitive' | 'strategic' | 'analytical' | 'creative' | 'systems';
   complexity_score: number;
   application_scenarios: string[];
   prompt_template: string;
@@ -18,45 +18,166 @@ interface MentalModel {
   case_study?: string;
 }
 
-interface ProblemAnalysisRequest {
-  problemText: string;
+interface ProblemInput {
+  problem_text: string;
   domain: string;
-  urgency: string;
-  context: Record<string, unknown>;
+  urgency: 'low' | 'medium' | 'high' | 'critical';
+  stakeholders?: string[];
+  context?: Record<string, unknown>;
 }
 
-interface ProblemAnalysisResponse {
-  problemType: string;
-  complexityScore: number;
-  keyFactors: string[];
-  recommendedModels: Array<{
-    id: string;
-    name: string;
-    category: string;
-    description: string;
-    matchScore: number;
-  }>;
-  solutions: Array<{
-    title: string;
-    description: string;
-    confidence: number;
-    advantages: string[];
-    challenges: string[];
-    basedOn: string;
-  }>;
+interface ModelSolution {
+  model_id: string;
+  model_name: string;
+  solution_text: string;
+  confidence_score: number;
+  reasoning: string;
+  alternatives: string[];
+  limitations: string[];
+  next_steps: string[];
 }
 
 export class MentalModelApiService {
+  private mockModels: MentalModel[] = [
+    {
+      id: 'first_principles',
+      name: 'First Principles',
+      category: 'analytical',
+      complexity_score: 7,
+      application_scenarios: ['problem decomposition', 'innovation', 'strategic planning'],
+      prompt_template: 'Analyze {problem} by breaking it down to its fundamental truths and reasoning up from there.',
+      performance_metrics: {
+        accuracy: 85,
+        usage_count: 1243,
+        success_rate: 78,
+        relevance_score: 82
+      },
+      description: 'A method of thinking that involves breaking down complex problems into basic elements and then reassembling them from the ground up.',
+      limitations: ['Time-consuming', 'Requires deep domain knowledge', 'May miss emergent properties']
+    },
+    {
+      id: 'nash_equilibrium',
+      name: 'Nash Equilibrium',
+      category: 'strategic',
+      complexity_score: 8,
+      application_scenarios: ['conflict resolution', 'negotiation', 'competitive strategy'],
+      prompt_template: 'Identify the key actors in {problem}, their possible strategies, and payoffs.',
+      performance_metrics: {
+        accuracy: 79,
+        usage_count: 876,
+        success_rate: 72,
+        relevance_score: 85
+      },
+      description: 'A concept in game theory where the optimal outcome occurs when there is no incentive for players to deviate from their initial strategy.',
+      limitations: ['Assumes rational actors', 'Multiple equilibria may exist', 'Difficult to calculate in complex scenarios']
+    },
+    {
+      id: 'systems_thinking',
+      name: 'Systems Thinking',
+      category: 'systems',
+      complexity_score: 9,
+      application_scenarios: ['complex problem solving', 'organizational design', 'policy development'],
+      prompt_template: 'Analyze {problem} as an interconnected system. Map the key components, relationships, and feedback loops.',
+      performance_metrics: {
+        accuracy: 82,
+        usage_count: 1056,
+        success_rate: 75,
+        relevance_score: 88
+      },
+      description: 'An approach to understanding how different components within a system influence one another within a complete entity.',
+      limitations: ['Can become overwhelmingly complex', 'Difficult to quantify relationships', 'May lack predictive precision']
+    },
+    {
+      id: 'opportunity_cost',
+      name: 'Opportunity Cost',
+      category: 'analytical',
+      complexity_score: 5,
+      application_scenarios: ['resource allocation', 'decision making', 'investment analysis'],
+      prompt_template: 'For {problem}, identify all available options and what must be given up to obtain a particular choice.',
+      performance_metrics: {
+        accuracy: 88,
+        usage_count: 1532,
+        success_rate: 82,
+        relevance_score: 79
+      },
+      description: 'The loss of potential gain from other alternatives when one alternative is chosen.',
+      limitations: ['Difficult to quantify intangible costs', 'Future value uncertainty', 'Psychological biases in assessment']
+    },
+    {
+      id: 'second_order_thinking',
+      name: 'Second-Order Thinking',
+      category: 'cognitive',
+      complexity_score: 6,
+      application_scenarios: ['strategic planning', 'risk assessment', 'policy analysis'],
+      prompt_template: 'For {problem}, go beyond immediate consequences and consider the effects of those effects.',
+      performance_metrics: {
+        accuracy: 81,
+        usage_count: 1124,
+        success_rate: 76,
+        relevance_score: 84
+      },
+      description: 'Considering not just the immediate results of actions but the subsequent effects of those results.',
+      limitations: ['Cognitive complexity', 'Diminishing accuracy with time horizon', 'Analysis paralysis risk']
+    },
+    {
+      id: 'inversion',
+      name: 'Inversion',
+      category: 'cognitive',
+      complexity_score: 6,
+      application_scenarios: ['problem solving', 'risk management', 'goal setting'],
+      prompt_template: 'Instead of focusing on what would make {problem} successful, identify what would cause it to fail and avoid those things.',
+      performance_metrics: {
+        accuracy: 83,
+        usage_count: 987,
+        success_rate: 79,
+        relevance_score: 81
+      },
+      description: 'A problem-solving technique where you look at the problem backward, focusing on avoiding what you don't want rather than pursuing what you do want.',
+      limitations: ['May miss positive opportunities', 'Can lead to overly cautious approaches', 'Requires thorough understanding of failure modes']
+    },
+    {
+      id: 'bayes_theorem',
+      name: 'Bayesian Reasoning',
+      category: 'analytical',
+      complexity_score: 8,
+      application_scenarios: ['probability assessment', 'decision making under uncertainty', 'forecasting'],
+      prompt_template: 'For {problem}, start with prior probabilities, then update them based on new evidence using Bayes' theorem.',
+      performance_metrics: {
+        accuracy: 86,
+        usage_count: 765,
+        success_rate: 74,
+        relevance_score: 87
+      },
+      description: 'A mathematical framework for updating beliefs based on new evidence, using prior probabilities and likelihood ratios.',
+      limitations: ['Requires accurate prior probabilities', 'Computationally intensive for complex problems', 'Subjective interpretation of probabilities']
+    },
+    {
+      id: 'occams_razor',
+      name: 'Occam\'s Razor',
+      category: 'analytical',
+      complexity_score: 4,
+      application_scenarios: ['hypothesis testing', 'problem diagnosis', 'theory selection'],
+      prompt_template: 'When examining {problem}, prefer the simplest explanation that fits the facts.',
+      performance_metrics: {
+        accuracy: 79,
+        usage_count: 1432,
+        success_rate: 81,
+        relevance_score: 76
+      },
+      description: 'The principle that, all else being equal, simpler explanations are more likely to be correct than complex ones.',
+      limitations: ['May oversimplify complex problems', 'Simplicity is subjective', 'Not always applicable in complex systems']
+    }
+  ];
+
   /**
    * Get all mental models
    */
-  async getModels(): Promise<ApiResponse<MentalModel[]>> {
+  async getAllModels(): Promise<ApiResponse<MentalModel[]>> {
     try {
       // In a real implementation, this would fetch from Supabase
-      // For now, we'll return mock data
       return {
         success: true,
-        data: this.getMockModels()
+        data: this.mockModels
       };
     } catch (error) {
       return {
@@ -67,17 +188,37 @@ export class MentalModelApiService {
   }
 
   /**
+   * Get mental models by category
+   */
+  async getModelsByCategory(category: string): Promise<ApiResponse<MentalModel[]>> {
+    try {
+      const filteredModels = this.mockModels.filter(model => 
+        model.category.toLowerCase() === category.toLowerCase()
+      );
+      
+      return {
+        success: true,
+        data: filteredModels
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch mental models by category'
+      };
+    }
+  }
+
+  /**
    * Get a specific mental model by ID
    */
   async getModelById(id: string): Promise<ApiResponse<MentalModel>> {
     try {
-      const models = this.getMockModels();
-      const model = models.find(m => m.id === id);
+      const model = this.mockModels.find(model => model.id === id);
       
       if (!model) {
         throw new Error(`Mental model with ID ${id} not found`);
       }
-
+      
       return {
         success: true,
         data: model
@@ -91,32 +232,106 @@ export class MentalModelApiService {
   }
 
   /**
-   * Analyze a problem and recommend mental models
+   * Analyze a problem and recommend suitable mental models
    */
-  async analyzeProblem(request: ProblemAnalysisRequest): Promise<ApiResponse<ProblemAnalysisResponse>> {
+  async analyzeProblem(problem: ProblemInput): Promise<ApiResponse<{
+    recommended_models: Array<{
+      model_id: string;
+      model_name: string;
+      relevance_score: number;
+      rationale: string;
+    }>;
+    problem_analysis: {
+      complexity: number;
+      key_factors: string[];
+      domain_classification: string;
+      uncertainty_level: number;
+    };
+  }>> {
     try {
-      // In a real implementation, this would call Gemini API
-      // For now, we'll return mock data
-      const mockAnalysis: ProblemAnalysisResponse = {
-        problemType: this.getProblemType(request.domain),
-        complexityScore: Math.floor(Math.random() * 5) + 5, // 5-10
-        keyFactors: this.getKeyFactors(request.domain),
-        recommendedModels: this.getRecommendedModels(request.domain).map(model => ({
-          id: model.id,
-          name: model.name,
-          category: model.category,
-          description: model.description,
-          matchScore: Math.floor(Math.random() * 30) + 70 // 70-100
-        })),
-        solutions: this.getMockSolutions(request.domain)
+      // Simulate AI analysis with mock data
+      // In a real implementation, this would use Gemini API
+      
+      // Wait for a realistic delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Generate mock recommendations based on problem domain
+      const domainKeywords: Record<string, string[]> = {
+        'geopolitics': ['conflict', 'diplomacy', 'international', 'policy', 'relations', 'security', 'trade'],
+        'business': ['competition', 'market', 'strategy', 'investment', 'growth', 'profit', 'risk'],
+        'technology': ['innovation', 'development', 'disruption', 'adoption', 'integration', 'scaling'],
+        'social': ['behavior', 'community', 'culture', 'influence', 'network', 'society'],
+        'environmental': ['climate', 'conservation', 'ecosystem', 'resources', 'sustainability']
       };
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
+      
+      // Determine domain based on keywords
+      let detectedDomain = problem.domain;
+      if (!detectedDomain) {
+        const lowerProblem = problem.problem_text.toLowerCase();
+        for (const [domain, keywords] of Object.entries(domainKeywords)) {
+          if (keywords.some(keyword => lowerProblem.includes(keyword))) {
+            detectedDomain = domain;
+            break;
+          }
+        }
+      }
+      
+      // Select models based on domain and urgency
+      let recommendedModelIds: string[] = [];
+      
+      switch (detectedDomain) {
+        case 'geopolitics':
+          recommendedModelIds = ['nash_equilibrium', 'systems_thinking', 'second_order_thinking'];
+          break;
+        case 'business':
+          recommendedModelIds = ['opportunity_cost', 'first_principles', 'bayes_theorem'];
+          break;
+        case 'technology':
+          recommendedModelIds = ['first_principles', 'systems_thinking', 'inversion'];
+          break;
+        case 'social':
+          recommendedModelIds = ['systems_thinking', 'second_order_thinking', 'nash_equilibrium'];
+          break;
+        case 'environmental':
+          recommendedModelIds = ['systems_thinking', 'second_order_thinking', 'opportunity_cost'];
+          break;
+        default:
+          // Default recommendations
+          recommendedModelIds = ['first_principles', 'systems_thinking', 'occams_razor'];
+      }
+      
+      // Adjust based on urgency
+      if (problem.urgency === 'high' || problem.urgency === 'critical') {
+        // For high urgency, prioritize simpler models
+        if (!recommendedModelIds.includes('occams_razor')) {
+          recommendedModelIds.unshift('occams_razor');
+        }
+      }
+      
+      // Format recommendations
+      const recommendations = recommendedModelIds.map((id, index) => {
+        const model = this.mockModels.find(m => m.id === id);
+        if (!model) return null;
+        
+        return {
+          model_id: model.id,
+          model_name: model.name,
+          relevance_score: 95 - (index * 5), // Decreasing relevance
+          rationale: `${model.name} is well-suited for ${detectedDomain} problems because it ${getModelRationale(model.id, detectedDomain)}`
+        };
+      }).filter(Boolean);
+      
       return {
         success: true,
-        data: mockAnalysis
+        data: {
+          recommended_models: recommendations,
+          problem_analysis: {
+            complexity: problem.urgency === 'critical' ? 9 : problem.urgency === 'high' ? 7 : problem.urgency === 'medium' ? 5 : 3,
+            key_factors: extractKeyFactors(problem.problem_text),
+            domain_classification: detectedDomain,
+            uncertainty_level: problem.urgency === 'critical' ? 85 : problem.urgency === 'high' ? 70 : problem.urgency === 'medium' ? 50 : 30
+          }
+        }
       };
     } catch (error) {
       return {
@@ -127,424 +342,195 @@ export class MentalModelApiService {
   }
 
   /**
-   * Submit a solution for a problem
+   * Generate a solution using a specific mental model
    */
-  async submitSolution(problemId: string, modelId: string, solution: Record<string, unknown>): Promise<ApiResponse<{ id: string }>> {
+  async generateSolution(modelId: string, problem: ProblemInput): Promise<ApiResponse<ModelSolution>> {
     try {
-      // In a real implementation, this would save to Supabase
+      const model = this.mockModels.find(m => m.id === modelId);
+      
+      if (!model) {
+        throw new Error(`Mental model with ID ${modelId} not found`);
+      }
+      
+      // Simulate AI solution generation with mock data
+      // In a real implementation, this would use Gemini API
+      
+      // Wait for a realistic delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const solution: ModelSolution = {
+        model_id: model.id,
+        model_name: model.name,
+        solution_text: generateSolutionText(model.id, problem.problem_text),
+        confidence_score: Math.floor(70 + Math.random() * 25),
+        reasoning: `This solution applies ${model.name} by ${getModelApproach(model.id)}`,
+        alternatives: generateAlternatives(model.id),
+        limitations: model.limitations,
+        next_steps: generateNextSteps(model.id)
+      };
+      
       return {
         success: true,
-        data: { id: `sol-${Date.now()}` }
+        data: solution
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to submit solution'
+        error: error instanceof Error ? error.message : 'Failed to generate solution'
       };
     }
   }
+}
 
-  // Mock data generators
-  private getMockModels(): MentalModel[] {
-    return [
-      {
-        id: 'first_principles',
-        name: 'First Principles',
-        category: 'analytical',
-        complexity_score: 7,
-        application_scenarios: ['problem decomposition', 'innovation', 'strategic planning'],
-        prompt_template: 'Analyze {problem} by breaking it down to its fundamental truths and reasoning up from there.',
-        performance_metrics: {
-          accuracy: 85,
-          usage_count: 12450,
-          success_rate: 78,
-          relevance_score: 82
-        },
-        description: 'A method of thinking that involves breaking down complex problems into basic elements and then reassembling them from the ground up.',
-        limitations: ['Time-consuming', 'Requires deep domain knowledge', 'May miss emergent properties']
-      },
-      {
-        id: 'nash_equilibrium',
-        name: 'Nash Equilibrium',
-        category: 'strategic',
-        complexity_score: 8,
-        application_scenarios: ['conflict resolution', 'negotiation', 'competitive strategy'],
-        prompt_template: 'Identify the key actors in {problem}, their possible strategies, and payoffs.',
-        performance_metrics: {
-          accuracy: 79,
-          usage_count: 8320,
-          success_rate: 72,
-          relevance_score: 88
-        },
-        description: 'A concept in game theory where the optimal outcome occurs when there is no incentive for players to deviate from their initial strategy.',
-        limitations: ['Assumes rational actors', 'Multiple equilibria may exist', 'Difficult to calculate in complex scenarios']
-      },
-      {
-        id: 'systems_thinking',
-        name: 'Systems Thinking',
-        category: 'systems',
-        complexity_score: 9,
-        application_scenarios: ['complex problem solving', 'organizational design', 'policy development'],
-        prompt_template: 'Analyze {problem} as an interconnected system. Map the key components, relationships, and feedback loops.',
-        performance_metrics: {
-          accuracy: 82,
-          usage_count: 9750,
-          success_rate: 75,
-          relevance_score: 90
-        },
-        description: 'An approach to understanding how different components within a system influence one another within a complete entity.',
-        limitations: ['Can become overwhelmingly complex', 'Difficult to quantify relationships', 'May lack predictive precision']
-      },
-      {
-        id: 'opportunity_cost',
-        name: 'Opportunity Cost',
-        category: 'analytical',
-        complexity_score: 5,
-        application_scenarios: ['resource allocation', 'decision making', 'investment analysis'],
-        prompt_template: 'For {problem}, identify all available options and what must be given up to obtain a particular choice.',
-        performance_metrics: {
-          accuracy: 88,
-          usage_count: 15200,
-          success_rate: 82,
-          relevance_score: 75
-        },
-        description: 'The loss of potential gain from other alternatives when one alternative is chosen.',
-        limitations: ['Difficult to quantify intangible costs', 'Future value uncertainty', 'Psychological biases in assessment']
-      },
-      {
-        id: 'second_order_thinking',
-        name: 'Second-Order Thinking',
-        category: 'cognitive',
-        complexity_score: 6,
-        application_scenarios: ['strategic planning', 'risk assessment', 'policy analysis'],
-        prompt_template: 'For {problem}, go beyond immediate consequences and consider the effects of those effects.',
-        performance_metrics: {
-          accuracy: 76,
-          usage_count: 11300,
-          success_rate: 70,
-          relevance_score: 85
-        },
-        description: 'Considering not just the immediate results of actions but the subsequent effects of those results.',
-        limitations: ['Cognitive complexity', 'Diminishing accuracy with time horizon', 'Analysis paralysis risk']
-      },
-      {
-        id: 'bayes_theorem',
-        name: 'Bayesian Reasoning',
-        category: 'analytical',
-        complexity_score: 7,
-        application_scenarios: ['probability assessment', 'decision making under uncertainty', 'risk analysis'],
-        prompt_template: 'For {problem}, update your prior beliefs based on new evidence using Bayes\' rule.',
-        performance_metrics: {
-          accuracy: 83,
-          usage_count: 9800,
-          success_rate: 77,
-          relevance_score: 80
-        },
-        description: 'A mathematical framework for updating beliefs based on new evidence, essential for reasoning under uncertainty.',
-        limitations: ['Requires quantifiable probabilities', 'Subjective prior selection', 'Computational complexity in complex scenarios']
-      },
-      {
-        id: 'inversion',
-        name: 'Inversion',
-        category: 'cognitive',
-        complexity_score: 4,
-        application_scenarios: ['problem solving', 'risk mitigation', 'goal setting'],
-        prompt_template: 'Instead of focusing on how to achieve {problem}, think about what would cause it to fail and avoid those things.',
-        performance_metrics: {
-          accuracy: 89,
-          usage_count: 14200,
-          success_rate: 85,
-          relevance_score: 78
-        },
-        description: 'Approaching a problem by focusing on what to avoid rather than what to pursue, often revealing non-obvious solutions.',
-        limitations: ['May miss positive opportunities', 'Can lead to overly cautious approaches', 'Not ideal for creative endeavors']
-      },
-      {
-        id: 'expected_value',
-        name: 'Expected Value',
-        category: 'analytical',
-        complexity_score: 6,
-        application_scenarios: ['decision analysis', 'risk assessment', 'investment evaluation'],
-        prompt_template: 'For each option in {problem}, calculate the probability-weighted average of all possible outcomes.',
-        performance_metrics: {
-          accuracy: 81,
-          usage_count: 10500,
-          success_rate: 76,
-          relevance_score: 83
-        },
-        description: 'A decision-making framework that weights potential outcomes by their probability of occurrence.',
-        limitations: ['Requires accurate probability estimates', 'May undervalue rare but catastrophic events', 'Assumes risk neutrality']
-      },
-      {
-        id: 'scenario_planning',
-        name: 'Scenario Planning',
-        category: 'strategic',
-        complexity_score: 7,
-        application_scenarios: ['long-term strategy', 'risk management', 'contingency planning'],
-        prompt_template: 'For {problem}, develop multiple plausible future scenarios and strategies for each.',
-        performance_metrics: {
-          accuracy: 74,
-          usage_count: 8900,
-          success_rate: 69,
-          relevance_score: 87
-        },
-        description: 'A strategic planning method that uses structured approaches to imagine different possible futures.',
-        limitations: ['Resource intensive', 'Difficult to assign probabilities', 'Can miss black swan events']
-      },
-      {
-        id: 'occams_razor',
-        name: 'Occam\'s Razor',
-        category: 'cognitive',
-        complexity_score: 3,
-        application_scenarios: ['hypothesis testing', 'problem diagnosis', 'theory selection'],
-        prompt_template: 'When analyzing {problem}, prefer the simplest explanation that fits the facts.',
-        performance_metrics: {
-          accuracy: 72,
-          usage_count: 16800,
-          success_rate: 68,
-          relevance_score: 65
-        },
-        description: 'The principle that the simplest explanation is usually the correct one, all else being equal.',
-        limitations: ['Complex problems may require complex solutions', 'Simplicity is subjective', 'Can lead to oversimplification']
-      }
-    ];
-  }
-
-  private getRecommendedModels(domain: string): MentalModel[] {
-    const allModels = this.getMockModels();
-    
-    // Select 3-5 models based on domain
-    let modelCount = Math.floor(Math.random() * 3) + 3; // 3-5 models
-    let selectedModels: MentalModel[] = [];
-    
-    switch (domain) {
-      case 'geopolitical':
-        selectedModels = allModels.filter(m => 
-          ['nash_equilibrium', 'systems_thinking', 'scenario_planning'].includes(m.id)
-        );
-        break;
-      case 'financial':
-        selectedModels = allModels.filter(m => 
-          ['expected_value', 'opportunity_cost', 'bayes_theorem'].includes(m.id)
-        );
-        break;
-      case 'strategic':
-        selectedModels = allModels.filter(m => 
-          ['second_order_thinking', 'scenario_planning', 'first_principles'].includes(m.id)
-        );
-        break;
-      default:
-        // Random selection
-        const shuffled = [...allModels].sort(() => 0.5 - Math.random());
-        selectedModels = shuffled.slice(0, modelCount);
+// Helper functions for generating mock content
+function getModelRationale(modelId: string, domain: string): string {
+  const rationales: Record<string, Record<string, string>> = {
+    'first_principles': {
+      'default': 'helps break down complex problems into fundamental components.',
+      'geopolitics': 'identifies the core drivers behind international relations and policy decisions.',
+      'business': 'strips away assumptions to reveal the fundamental truths of market dynamics.',
+      'technology': 'enables innovation by questioning established approaches and rebuilding from basics.'
+    },
+    'nash_equilibrium': {
+      'default': 'helps identify stable outcomes in competitive situations.',
+      'geopolitics': 'models the strategic interactions between nations with competing interests.',
+      'business': 'predicts competitive market behaviors and optimal pricing strategies.',
+      'social': 'explains stable patterns in social interactions and group dynamics.'
+    },
+    'systems_thinking': {
+      'default': 'reveals how different components interact within a complex system.',
+      'geopolitics': 'maps the interconnected nature of global politics and economic systems.',
+      'environmental': 'shows how ecological, economic, and social factors interact in environmental challenges.',
+      'technology': 'identifies feedback loops and emergent behaviors in complex technological ecosystems.'
+    },
+    'opportunity_cost': {
+      'default': 'quantifies what must be given up when making a choice.',
+      'business': 'helps prioritize investments and resource allocation decisions.',
+      'environmental': 'clarifies the tradeoffs involved in resource management decisions.',
+      'geopolitics': 'evaluates the tradeoffs in diplomatic and strategic policy choices.'
+    },
+    'second_order_thinking': {
+      'default': 'considers the cascading effects beyond immediate consequences.',
+      'geopolitics': 'anticipates how policy decisions will trigger reactions and counter-reactions.',
+      'environmental': 'projects long-term impacts of interventions on complex ecosystems.',
+      'social': 'predicts how social policies may create unintended behavioral changes.'
+    },
+    'inversion': {
+      'default': 'identifies potential failure modes to avoid.',
+      'business': 'highlights critical risks that could derail strategic initiatives.',
+      'technology': 'surfaces potential design flaws and implementation challenges early.',
+      'geopolitics': 'identifies diplomatic and strategic pitfalls to avoid.'
+    },
+    'bayes_theorem': {
+      'default': 'updates probability estimates as new information becomes available.',
+      'business': 'refines market forecasts and investment decisions with incoming data.',
+      'geopolitics': 'adjusts risk assessments as new intelligence and events unfold.',
+      'technology': 'improves predictive models through continuous learning from new data.'
+    },
+    'occams_razor': {
+      'default': 'identifies the simplest explanation that fits the facts.',
+      'business': 'cuts through complexity to focus on the most likely market dynamics.',
+      'geopolitics': 'avoids overcomplicating analysis of international events and motivations.',
+      'technology': 'prioritizes simpler solutions that meet requirements with fewer components.'
     }
-    
-    return selectedModels;
-  }
+  };
+  
+  return rationales[modelId]?.[domain] || rationales[modelId]?.['default'] || 'provides a structured approach to analysis and decision-making.';
+}
 
-  private getProblemType(domain: string): string {
-    const problemTypes: Record<string, string[]> = {
-      'geopolitical': [
-        'International Conflict Analysis',
-        'Trade Policy Optimization',
-        'Diplomatic Strategy Formulation',
-        'Alliance Stability Assessment'
-      ],
-      'financial': [
-        'Investment Risk Analysis',
-        'Market Trend Prediction',
-        'Asset Allocation Optimization',
-        'Economic Policy Impact Assessment'
-      ],
-      'strategic': [
-        'Competitive Strategy Development',
-        'Long-term Planning Challenge',
-        'Resource Allocation Dilemma',
-        'Organizational Transformation'
-      ],
-      'organizational': [
-        'Team Dynamics Optimization',
-        'Change Management Challenge',
-        'Leadership Decision Framework',
-        'Organizational Structure Design'
-      ],
-      'personal': [
-        'Career Decision Framework',
-        'Life Balance Optimization',
-        'Personal Development Strategy',
-        'Relationship Dynamics Analysis'
-      ]
-    };
-    
-    const options = problemTypes[domain] || problemTypes['strategic'];
-    return options[Math.floor(Math.random() * options.length)];
-  }
+function getModelApproach(modelId: string): string {
+  const approaches: Record<string, string> = {
+    'first_principles': 'breaking down the problem to its fundamental elements and rebuilding a solution from the ground up',
+    'nash_equilibrium': 'identifying the key actors, their strategies, and finding the stable equilibrium where no actor can improve by changing only their strategy',
+    'systems_thinking': 'mapping the interconnected components and feedback loops to understand system-wide behavior and intervention points',
+    'opportunity_cost': 'evaluating all available options and calculating the value of the next best alternative foregone',
+    'second_order_thinking': 'considering not just immediate consequences but the subsequent effects of those effects',
+    'inversion': 'identifying what would cause failure and developing strategies to avoid those outcomes',
+    'bayes_theorem': 'starting with prior probabilities and updating them based on new evidence',
+    'occams_razor': 'preferring the simplest explanation or solution that adequately addresses the problem'
+  };
+  
+  return approaches[modelId] || 'applying a structured analytical framework to the problem';
+}
 
-  private getKeyFactors(domain: string): string[] {
-    const factorsByDomain: Record<string, string[]> = {
-      'geopolitical': [
-        'Power dynamics', 'Economic interdependence', 'Historical precedents',
-        'Cultural factors', 'Military capabilities', 'Alliance structures',
-        'Domestic politics', 'Resource dependencies'
-      ],
-      'financial': [
-        'Market volatility', 'Interest rate trends', 'Regulatory environment',
-        'Liquidity constraints', 'Investor sentiment', 'Macroeconomic indicators',
-        'Sector performance', 'Global economic conditions'
-      ],
-      'strategic': [
-        'Competitive landscape', 'Resource constraints', 'Technological disruption',
-        'Market trends', 'Organizational capabilities', 'Stakeholder interests',
-        'Regulatory environment', 'Long-term industry outlook'
-      ],
-      'organizational': [
-        'Team composition', 'Leadership style', 'Organizational culture',
-        'Communication patterns', 'Decision-making processes', 'Resource allocation',
-        'Performance metrics', 'Change readiness'
-      ],
-      'personal': [
-        'Value alignment', 'Skill development', 'Time constraints',
-        'Financial resources', 'Support networks', 'Health considerations',
-        'Long-term goals', 'Risk tolerance'
-      ]
-    };
-    
-    const allFactors = factorsByDomain[domain] || factorsByDomain['strategic'];
-    const shuffled = [...allFactors].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 4 + Math.floor(Math.random() * 3)); // 4-6 factors
-  }
+function extractKeyFactors(problemText: string): string[] {
+  // In a real implementation, this would use NLP or AI to extract key factors
+  // For mock purposes, we'll return generic factors
+  return [
+    'Stakeholder interests',
+    'Resource constraints',
+    'Time pressure',
+    'Uncertainty level',
+    'Potential risks'
+  ];
+}
 
-  private getMockSolutions(domain: string): Array<{
-    title: string;
-    description: string;
-    confidence: number;
-    advantages: string[];
-    challenges: string[];
-    basedOn: string;
-  }> {
-    const solutionsByDomain: Record<string, Array<{
-      title: string;
-      description: string;
-      advantages: string[];
-      challenges: string[];
-      basedOn: string;
-    }>> = {
-      'geopolitical': [
-        {
-          title: 'Diplomatic Engagement Strategy',
-          description: 'A multi-layered approach combining formal negotiations, back-channel diplomacy, and international coalition building to address the core issues while maintaining strategic flexibility.',
-          advantages: [
-            'Preserves relationship capital',
-            'Minimizes escalation risks',
-            'Creates multiple paths to resolution',
-            'Builds international legitimacy'
-          ],
-          challenges: [
-            'Time-intensive process',
-            'Requires skilled diplomatic personnel',
-            'Success depends on counterparty willingness',
-            'May appear as weakness to domestic audience'
-          ],
-          basedOn: 'Nash Equilibrium'
-        },
-        {
-          title: 'Strategic Deterrence Framework',
-          description: 'A calibrated approach that signals resolve through measured economic and security actions while maintaining open communication channels to prevent miscalculation.',
-          advantages: [
-            'Creates clear consequences for aggression',
-            'Establishes credible boundaries',
-            'Maintains negotiation options',
-            'Can be adjusted incrementally'
-          ],
-          challenges: [
-            'Risk of unintended escalation',
-            'Requires precise signaling',
-            'Resource intensive',
-            'May trigger counter-deterrence'
-          ],
-          basedOn: 'Game Theory'
-        }
-      ],
-      'financial': [
-        {
-          title: 'Adaptive Portfolio Strategy',
-          description: 'A dynamic asset allocation approach that adjusts exposure based on changing market conditions, economic indicators, and volatility regimes.',
-          advantages: [
-            'Responsive to changing conditions',
-            'Reduces drawdown risk',
-            'Capitalizes on market inefficiencies',
-            'Systematic rather than emotional'
-          ],
-          challenges: [
-            'Requires continuous monitoring',
-            'Transaction costs may impact returns',
-            'Model risk in signal generation',
-            'Tax implications of frequent rebalancing'
-          ],
-          basedOn: 'Bayesian Reasoning'
-        },
-        {
-          title: 'Scenario-Based Risk Management',
-          description: 'A comprehensive framework that identifies key risk factors, models multiple scenarios, and implements targeted hedging strategies for each potential outcome.',
-          advantages: [
-            'Prepares for multiple futures',
-            'Quantifies potential impacts',
-            'Identifies non-obvious correlations',
-            'Provides actionable contingency plans'
-          ],
-          challenges: [
-            'Hedging costs reduce returns',
-            'Scenario completeness is difficult',
-            'Model risk in scenario generation',
-            'Complexity in implementation'
-          ],
-          basedOn: 'Scenario Planning'
-        }
-      ],
-      'strategic': [
-        {
-          title: 'Asymmetric Opportunity Approach',
-          description: 'A strategic framework that identifies and exploits overlooked market opportunities where your unique capabilities provide disproportionate competitive advantage.',
-          advantages: [
-            'Reduces head-to-head competition',
-            'Leverages existing capabilities',
-            'Creates defensible market position',
-            'Higher potential returns'
-          ],
-          challenges: [
-            'Requires deep market insight',
-            'May need capability development',
-            'Smaller initial market size',
-            'Unproven territory risks'
-          ],
-          basedOn: 'First Principles'
-        },
-        {
-          title: 'Resilient Growth Framework',
-          description: 'A balanced approach that pursues multiple growth vectors simultaneously while building organizational adaptability to respond to market shifts and disruptions.',
-          advantages: [
-            'Diversifies growth sources',
-            'Builds organizational capabilities',
-            'Reduces single-point failures',
-            'Creates strategic optionality'
-          ],
-          challenges: [
-            'Resource dilution risks',
-            'Organizational complexity',
-            'Requires strong coordination',
-            'Higher management overhead'
-          ],
-          basedOn: 'Systems Thinking'
-        }
-      ]
-    };
+function generateSolutionText(modelId: string, problemText: string): string {
+  const solutions: Record<string, string> = {
+    'first_principles': `Breaking this problem down to its fundamental components reveals that the core issues are resource allocation, stakeholder alignment, and timing constraints. By rebuilding from these basics, we can see that the optimal approach is to first establish clear priorities based on critical path dependencies, then allocate resources accordingly while maintaining transparent communication with all stakeholders.`,
     
-    const solutions = solutionsByDomain[domain] || solutionsByDomain['strategic'];
-    return solutions.map(solution => ({
-      ...solution,
-      confidence: Math.floor(Math.random() * 20) + 75 // 75-95%
-    }));
-  }
+    'nash_equilibrium': `Analyzing this as a strategic interaction between multiple parties, we can identify that each stakeholder has distinct preferences and constraints. The stable equilibrium occurs when Party A adopts a collaborative approach while maintaining clear boundaries, Party B focuses on their core competencies while yielding on secondary issues, and Party C provides support without overcommitting resources.`,
+    
+    'systems_thinking': `This problem represents an interconnected system with multiple feedback loops. The key insight is that intervention at leverage point X will create cascading effects throughout the system. By strengthening the positive feedback loop between components Y and Z while dampening the reinforcing loop between A and B, we can shift the system toward a more desirable state with minimal resource expenditure.`,
+    
+    'opportunity_cost': `The analysis reveals that pursuing Option A would require foregoing Options B and C, with a calculated opportunity cost of approximately 35% potential value. However, the unique strategic advantages of Option A outweigh this cost given the current context and constraints. The next best alternative (Option B) should be maintained as a contingency plan.`,
+    
+    'second_order_thinking': `While the immediate solution might appear to be X, considering second-order effects reveals potential unintended consequences in areas Y and Z. A more robust approach would be to implement a modified version of X that includes preventative measures for these secondary effects, particularly focusing on stakeholder reactions and system adaptations that would otherwise undermine the solution.`,
+    
+    'inversion': `By examining what would cause this initiative to fail, we've identified three critical failure modes: insufficient stakeholder buy-in, resource depletion before completion, and external regulatory changes. The solution therefore focuses on securing early stakeholder commitment, establishing resource buffers, and implementing a regulatory monitoring system with adaptive response protocols.`,
+    
+    'bayes_theorem': `Starting with our prior understanding of similar situations (60% probability of Outcome A), we've updated our assessment based on new evidence. The current data shifts our probability estimate to 78% confidence in Outcome A, suggesting that Strategy X is optimal given risk preferences and potential payoffs.`,
+    
+    'occams_razor': `While multiple complex explanations have been proposed, the simplest solution that addresses all requirements is to streamline the approval process, reduce decision nodes from seven to three, and implement a standardized evaluation framework. This approach requires minimal structural changes while resolving the core inefficiencies.`
+  };
+  
+  return solutions[modelId] || `After careful analysis using the selected mental model, the recommended approach is to address the core challenges through a structured framework that balances short-term needs with long-term objectives. The solution prioritizes key stakeholder concerns while maintaining alignment with strategic goals.`;
+}
+
+function generateAlternatives(modelId: string): string[] {
+  const alternatives: Record<string, string[]> = {
+    'first_principles': [
+      'Partial decomposition focusing only on technical elements',
+      'Staged implementation with iterative refinement',
+      'Outsourcing complex components to specialized partners'
+    ],
+    'nash_equilibrium': [
+      'Cooperative solution with formal enforcement mechanisms',
+      'Sequential decision-making with signaling opportunities',
+      'Coalition formation among smaller stakeholders'
+    ],
+    'systems_thinking': [
+      'Focus on subsystem optimization with defined interfaces',
+      'Adaptive management approach with regular feedback cycles',
+      'Boundary-spanning intervention targeting multiple subsystems simultaneously'
+    ],
+    'opportunity_cost': [
+      'Hybrid approach capturing partial benefits from multiple options',
+      'Staged decision-making to preserve optionality',
+      'Resource sharing arrangement to reduce exclusive commitments'
+    ],
+    'second_order_thinking': [
+      'Robust solution designed to withstand multiple future scenarios',
+      'Flexible approach with built-in adaptation mechanisms',
+      'Minimal intervention strategy focused on removing obstacles'
+    ]
+  };
+  
+  return alternatives[modelId] || [
+    'Alternative approach focusing on short-term outcomes',
+    'Collaborative solution involving all stakeholders',
+    'Phased implementation with regular reassessment'
+  ];
+}
+
+function generateNextSteps(modelId: string): string[] {
+  return [
+    'Validate assumptions with key stakeholders',
+    'Develop detailed implementation plan',
+    'Identify metrics for measuring success',
+    'Create risk mitigation strategies',
+    'Establish feedback mechanisms for continuous improvement'
+  ];
 }
 
 export const mentalModelApi = new MentalModelApiService();
