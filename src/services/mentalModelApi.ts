@@ -141,7 +141,7 @@ export class MentalModelApiService {
       category: 'analytical',
       complexity_score: 8,
       application_scenarios: ['probability assessment', 'decision making under uncertainty', 'forecasting'],
-      prompt_template: 'For {problem}, start with prior probabilities, then update them based on new evidence using Bayes' theorem.',
+      prompt_template: 'For {problem}, start with prior probabilities, then update them based on new evidence using Bayes\' theorem.',
       performance_metrics: {
         accuracy: 86,
         usage_count: 765,
