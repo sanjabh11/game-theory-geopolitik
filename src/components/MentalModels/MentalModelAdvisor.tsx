@@ -44,17 +44,38 @@ const MentalModelAdvisor: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // In a real implementation, we would call the Gemini API
-      // For now, we'll use a fallback response
-      const fallbackRecommendations = generateFallbackRecommendations(problem, domain, urgency);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setRecommendations(fallbackRecommendations);
+      // Call the Gemini API to analyze the problem
+      const response = await geminiApi.analyzeMentalModelProblem({
+        problemText: problem,
+        domain,
+        urgency,
+        context: { userLevel: 'intermediate' }
+      });
+
+      if (response.success && response.data) {
+        // Transform the response to match our component's state structure
+        const modelRecommendations = response.data.recommendedModels.map(model => ({
+          modelId: model.modelId,
+          modelName: model.modelName,
+          category: model.category || 'analytical', // Default category if not provided
+          relevanceScore: model.relevanceScore,
+          explanation: model.explanation,
+          applicationSteps: model.applicationSteps || []
+        }));
+        
+        setRecommendations(modelRecommendations);
+      } else {
+        // If API call fails, use fallback recommendations
+        const fallbackRecommendations = generateFallbackRecommendations(problem, domain, urgency);
+        setRecommendations(fallbackRecommendations);
+      }
     } catch (error) {
       console.error('Error getting recommendations:', error);
       setError('Failed to generate recommendations. Please try again.');
+      
+      // Use fallback recommendations even on error
+      const fallbackRecommendations = generateFallbackRecommendations(problem, domain, urgency);
+      setRecommendations(fallbackRecommendations);
     } finally {
       setLoading(false);
     }

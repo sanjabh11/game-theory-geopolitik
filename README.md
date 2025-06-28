@@ -75,7 +75,6 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
 - **Google Gemini AI** for advanced analysis and natural language processing
 - **News API** for real-time global news data
 - **Alpha Vantage** for economic and financial indicators
-- **Reddit API** for social media sentiment analysis
 
 ### Development Tools
 - **TypeScript** for compile-time type checking
@@ -103,7 +102,7 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
    Create a `.env` file with the following variables:
    ```env
    # Supabase Configuration
-   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_URL=your_supabase_project_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
    # AI Services
@@ -194,14 +193,6 @@ npm run type-check   # TypeScript type checking
 - **ESLint**: Consistent code style enforcement
 - **Prettier**: Automatic code formatting
 - **Git Hooks**: Pre-commit quality checks
-
-## 📊 Monitoring & Analytics
-
-- User engagement tracking
-- Feature usage analytics
-- Performance monitoring
-- Error reporting and alerting
-- API usage and rate limiting
 
 ## 🚀 Deployment
 

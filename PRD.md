@@ -115,12 +115,29 @@ You are a Quantitative Geopolitical Analytics AI. Generate predictions using tim
 - Task management workflows
 - AI-powered insight generation
 
+### User Story 7: Mental Model Library & Advisor
+**As a** strategic thinker  
+**I want to** access a library of mental models with AI recommendations  
+**So that** I can apply the most effective frameworks to complex problems
+
+**Acceptance Criteria:**
+- Comprehensive library of mental models
+- AI-powered model selection based on problem description
+- Application steps and guidance
+- Categorization by complexity and domain
+- Relevance scoring and explanations
+
+**LLM System Prompt:**
+```
+You are a Mental Model Advisor AI. Analyze problem descriptions and recommend the most appropriate mental models based on problem characteristics, domain, and urgency. Provide clear explanations of why each model is relevant and step-by-step application guidance.
+```
 
 ---
 
 ## Architecture Overview
 
 ### Tech Stack
+- **Frontend**: React 18 with TypeScript, Vite, Tailwind CSS, Framer Motion
 - **Backend**: Supabase (PostgreSQL + Real-time + Auth + Edge Functions)
 - **LLM Integration**: Google Gemini 2.5 Pro API
 - **Frontend Storage**: Browser LocalStorage + IndexedDB
@@ -128,112 +145,280 @@ You are a Quantitative Geopolitical Analytics AI. Generate predictions using tim
 - **Caching**: Browser Cache API + Local Storage
 
 ### Supabase Database Schema
+
+#### Core Tables
+
+**user_profiles**
 ```sql
 CREATE TABLE user_profiles (
     id UUID REFERENCES auth.users PRIMARY KEY,
     role TEXT NOT NULL DEFAULT 'student',
     preferences JSONB DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    notification_settings JSONB DEFAULT '{"email": true, "push": false, "sms": false}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+```
 
+**learning_progress**
+```sql
 CREATE TABLE learning_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES user_profiles(id),
     module_id TEXT NOT NULL,
     completion_percentage INTEGER DEFAULT 0,
-    last_accessed TIMESTAMP DEFAULT NOW(),
+    last_accessed TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     performance_data JSONB DEFAULT '{}'
 );
 ```
-This schema includes tables for user profiles, learning progress, risk assessments, and more, providing a comprehensive foundation for tracking user interactions and data-driven insights.
+
+**risk_assessments**
+```sql
+CREATE TABLE risk_assessments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    region TEXT NOT NULL,
+    risk_score INTEGER NOT NULL,
+    risk_level TEXT NOT NULL,
+    factors JSONB NOT NULL,
+    confidence_interval NUMERIC[] NOT NULL,
+    trend TEXT,
+    source_data JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
 ```
 
-### Key Features Implemented
+**scenario_simulations**
+```sql
+CREATE TABLE scenario_simulations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES user_profiles(id),
+    name TEXT NOT NULL,
+    scenario_type TEXT NOT NULL,
+    scenario_config JSONB NOT NULL,
+    results JSONB,
+    status TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+```
 
-#### ✅ Core Platform Features
-- **Responsive Design**: Mobile-optimized UI with dark mode support
-- **Authentication System**: Supabase Auth with role-based access
-- **Real-time Updates**: Live data synchronization across users
-- **AI Integration**: Google Gemini AI for advanced analysis
-- **Security**: Environment variable management with validation
+**crisis_events**
+```sql
+CREATE TABLE crisis_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    severity INTEGER NOT NULL,
+    regions TEXT[] NOT NULL,
+    keywords TEXT[] NOT NULL,
+    source_urls TEXT[] NOT NULL,
+    confidence_score NUMERIC,
+    escalation_potential TEXT,
+    timeline_urgency TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE
+);
+```
 
-#### ✅ Educational Components
-- **Interactive Tutorials**: Game theory concepts with real examples
-- **Progress Tracking**: User learning analytics and recommendations
-- **Assessment System**: Adaptive testing with immediate feedback
-- **Personalization**: Content tailored to user level and progress
+**mental_models**
+```sql
+CREATE TABLE mental_models (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL CHECK (category IN ('cognitive', 'strategic', 'analytical', 'creative', 'systems')),
+    complexity_score INTEGER NOT NULL CHECK (complexity_score >= 1 AND complexity_score <= 10),
+    application_scenarios TEXT[] NOT NULL DEFAULT '{}',
+    prompt_template TEXT NOT NULL,
+    performance_metrics JSONB NOT NULL DEFAULT '{"accuracy": 0, "usage_count": 0, "success_rate": 0, "relevance_score": 0}',
+    description TEXT NOT NULL,
+    limitations TEXT[] DEFAULT '{}',
+    case_study TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+```
 
-#### ✅ Analysis Tools
-- **Risk Assessment**: Multi-factor geopolitical risk scoring
-- **Scenario Simulation**: Game-theoretic modeling with equilibrium analysis
-- **Crisis Monitoring**: Real-time event tracking and severity assessment
-- **Predictive Analytics**: Probability forecasting with confidence intervals
-- **Economic Modeling**: GDP impact and trade analysis
+### API Integrations
 
-#### ✅ Collaboration Features
-- **Document Sharing**: Real-time collaborative editing
-- **Discussion Forums**: Threaded conversations with AI insights
-- **Version Control**: Track changes and maintain analysis history
-- **Notification System**: Alerts for important updates and events
+#### Google Gemini API
+- Used for AI-powered analysis and insights
+- Integrated with fallback mechanisms for reliability
+- Structured prompt engineering for consistent responses
 
-### Security & Performance
-- **Environment Variables**: Secure API key management
-- **Input Validation**: Comprehensive security checks
-- **Error Handling**: Graceful failure management
-- **Performance Optimization**: Code splitting and lazy loading
-- **Type Safety**: Full TypeScript implementation
+#### News API
+- Used for real-time news monitoring
+- Integrated with crisis monitoring and risk assessment
+- Sentiment analysis and relevance scoring
 
-### Critical Information for Future Developers
-- **API Integration**: Gemini AI handles all LLM processing
-- **Database**: Supabase with Row Level Security policies
-- **State Management**: React Query for efficient data caching
-- **UI Framework**: Tailwind CSS with Framer Motion animations
-- **Security**: Never hardcode API keys - use environment variables only
+#### Alpha Vantage API
+- Used for economic data and indicators
+- Integrated with risk assessment and predictive analytics
+- Trend analysis and forecasting
+
+### Security & Data Protection
+- Row Level Security (RLS) policies for all tables
+- JWT-based authentication with Supabase
+- Environment variable isolation for API keys
+- Secure data handling and validation
 
 ---
 
-## How to Implement
+## Implementation Details
 
-### Implementation Status: ✅ COMPLETED
+### Frontend Components
 
-#### Frontend Implementation
-- ✅ React 18 with TypeScript and functional components
-- ✅ Tailwind CSS with responsive design and dark mode
-- ✅ Framer Motion for smooth animations
-- ✅ React Router for navigation
-- ✅ React Query for data management
-- ✅ Component library with modular architecture
+#### Authentication
+- Login and registration forms
+- Session management
+- Protected routes
+- User profile management
 
-#### Backend Implementation
-- ✅ Supabase project configured with authentication
-- ✅ PostgreSQL database with RLS policies
-- ✅ Real-time subscriptions for live updates
-- ✅ Environment variable security implementation
-- ✅ API integration layer with error handling
+#### Game Theory Tutorial
+- Interactive learning modules
+- Progress tracking
+- Assessment system
+- Adaptive difficulty
 
-#### AI Integration
-- ✅ Google Gemini AI service integration
-- ✅ Comprehensive prompt engineering for all features
-- ✅ Response parsing and validation
-- ✅ Error handling and fallback mechanisms
+#### Risk Assessment
+- Region selection
+- Multi-factor analysis
+- Visualization of risk factors
+- Trend analysis
 
-#### Security Enhancements
-- ✅ Environment variable validation
-- ✅ API key security best practices
-- ✅ Security documentation (SECURITY.md)
-- ✅ Git history cleaned of hardcoded secrets
+#### Scenario Simulation
+- Scenario configuration
+- Actor and parameter definition
+- Results visualization
+- Strategic recommendations
 
-### Deployment Status
-- ✅ GitHub repository: https://github.com/sanjabh11/game-theory-geopolitik
-- ✅ Secure codebase with proper environment variable usage
-- ✅ Production-ready with comprehensive documentation
-- 🟡 Hosting platform deployment (pending)
-- 🟡 CI/CD pipeline setup (pending)
+#### Crisis Monitoring
+- Real-time alerts
+- Severity classification
+- Escalation tracking
+- Response recommendations
 
-### Next Development Priorities
-1. **Production Deployment**: Deploy to hosting platform (Vercel/Netlify)
-2. **API Rate Limiting**: Implement usage quotas and monitoring
-3. **User Analytics**: Add engagement tracking and usage metrics
-4. **Advanced Features**: Machine learning model training
-5. **Mobile App**: React Native implementation for mobile platforms
+#### Predictive Analytics
+- Forecast visualization
+- Confidence intervals
+- Market impact assessment
+- Correlation analysis
+
+#### Collaborative Workspace
+- Document sharing
+- Task management
+- Discussion threads
+- Version control
+
+#### Mental Models Library & Advisor
+- Model browsing and filtering
+- Problem analysis
+- Model recommendations
+- Application guidance
+
+### Backend Services
+
+#### Supabase Edge Functions
+- `game-theory-tutor`: Generates tutorial content
+- `risk-assessment`: Analyzes geopolitical risks
+- `scenario-simulation`: Runs game-theoretic simulations
+- `crisis-monitoring`: Monitors and alerts on crises
+
+#### Database Operations
+- User data management
+- Learning progress tracking
+- Risk assessment storage
+- Scenario simulation results
+- Crisis event tracking
+- Mental model management
+
+### API Services
+
+#### GeminiApiService
+- `analyzeRiskFactors`: Analyzes geopolitical risk factors
+- `generateScenarioOutcomes`: Generates scenario outcomes
+- `analyzeCrisis`: Analyzes crisis severity and impact
+- `generatePredictiveAnalysis`: Generates predictive analytics
+- `generateCollaborationInsights`: Generates collaboration insights
+- `analyzeMentalModelProblem`: Analyzes problems for mental model selection
+
+#### NewsApiService
+- `getTopHeadlines`: Gets top news headlines
+- `searchArticles`: Searches for specific news articles
+- `getGeopoliticalNews`: Gets geopolitical news
+- `getCrisisNews`: Gets crisis-related news
+
+#### EconomicApiService
+- `getRealGDP`: Gets real GDP data
+- `getInflationRate`: Gets inflation rate data
+- `getUnemploymentRate`: Gets unemployment rate data
+- `getExchangeRate`: Gets exchange rate data
+- `getEconomicRiskData`: Gets comprehensive economic risk data
+
+---
+
+## Deployment & Operations
+
+### Deployment Options
+- **Vercel**: Recommended for React applications
+- **Netlify**: Good alternative with CI/CD
+- **AWS Amplify**: Enterprise-scale deployment
+
+### Environment Configuration
+- Production environment variables
+- API key management
+- Database connection settings
+- Feature flags
+
+### Monitoring & Maintenance
+- Error tracking and reporting
+- Performance monitoring
+- Usage analytics
+- Regular updates and maintenance
+
+---
+
+## Future Enhancements
+
+### Short-term (1-3 months)
+- Mobile application development
+- Advanced visualization options
+- Enhanced user profile management
+- Notification system improvements
+
+### Medium-term (3-6 months)
+- Machine learning model training
+- Custom prediction model builder
+- Advanced collaboration features
+- Integration with additional data sources
+
+### Long-term (6-12 months)
+- Enterprise features (multi-tenant, advanced permissions)
+- Custom AI model fine-tuning
+- Advanced analytics and reporting
+- API for third-party integrations
+
+---
+
+## Appendix
+
+### User Roles
+- **Student**: Learning game theory concepts
+- **Professor**: Teaching and research
+- **Analyst**: Professional analysis and reporting
+- **Policymaker**: Decision-making and strategy
+- **Researcher**: Academic and applied research
+
+### Mental Model Categories
+- **Cognitive**: Thinking patterns and biases
+- **Strategic**: Decision-making frameworks
+- **Analytical**: Problem-solving approaches
+- **Creative**: Innovation and ideation methods
+- **Systems**: Understanding complex systems
+
+### Risk Assessment Methodology
+- **Risk Score**: 0-100 scale based on multiple factors
+- **Risk Levels**: Low (0-25), Moderate (26-50), High (51-75), Critical (76-100)
+- **Confidence Intervals**: Statistical reliability measures
+- **Trend Analysis**: Direction and rate of change over time
