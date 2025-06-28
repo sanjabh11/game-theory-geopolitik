@@ -151,52 +151,52 @@ const MentalModelAdvisor: React.FC = () => {
   const generateApplicationSteps = (modelId: string): string[] => {
     const steps: Record<string, string[]> = {
       'first_principles': [
-        'Identify the problem and clearly articulate what you\'re trying to solve',
-        'Break down the problem into its fundamental truths or components',
-        'Question all assumptions and conventional wisdom',
-        'Rebuild your solution from the ground up using only validated elements',
-        'Test your solution against the original problem constraints'
+        "Identify the problem and clearly articulate what you're trying to solve",
+        "Break down the problem into its fundamental truths or components",
+        "Question all assumptions and conventional wisdom",
+        "Rebuild your solution from the ground up using only validated elements",
+        "Test your solution against the original problem constraints"
       ],
       
       'opportunity_cost': [
-        'List all available options or alternatives',
-        'Identify the benefits and value of each option',
-        'Determine the next-best alternative to each choice',
-        'Calculate what you would be giving up by making each choice',
-        'Make decisions based on the true cost (including what\'s foregone)'
+        "List all available options or alternatives",
+        "Identify the benefits and value of each option",
+        "Determine the next-best alternative to each choice",
+        "Calculate what you would be giving up by making each choice",
+        "Make decisions based on the true cost (including what's foregone)"
       ],
       
       'nash_equilibrium': [
-        'Identify all key stakeholders or players',
-        'Map out possible strategies for each player',
-        'Determine payoffs for each combination of strategies',
-        'Find strategy combinations where no player can improve by changing only their strategy',
-        'Analyze the stability and optimality of the equilibrium'
+        "Identify all key stakeholders or players",
+        "Map out possible strategies for each player",
+        "Determine payoffs for each combination of strategies",
+        "Find strategy combinations where no player can improve by changing only their strategy",
+        "Analyze the stability and optimality of the equilibrium"
       ],
       
       'systems_thinking': [
-        'Define the system boundaries and key components',
-        'Map relationships and connections between components',
-        'Identify feedback loops (reinforcing and balancing)',
-        'Analyze how changes propagate through the system',
-        'Look for leverage points where small changes create large effects'
+        "Define the system boundaries and key components",
+        "Map relationships and connections between components",
+        "Identify feedback loops (reinforcing and balancing)",
+        "Analyze how changes propagate through the system",
+        "Look for leverage points where small changes create large effects"
       ],
       
       'second_order_thinking': [
-        'Identify the immediate or first-order consequences of actions',
-        'For each consequence, determine its subsequent effects',
-        'Map cascading impacts across different timeframes',
-        'Consider how systems and people will adapt to the changes',
-        'Identify potential unintended consequences and prepare mitigations'
+        "Identify the immediate or first-order consequences of actions",
+        "For each consequence, determine its subsequent effects",
+        "Map cascading impacts across different timeframes",
+        "Consider how systems and people will adapt to the changes",
+        "Identify potential unintended consequences and prepare mitigations"
       ]
     };
     
     return steps[modelId] || [
-      'Define the problem clearly',
-      'Apply the mental model framework to analyze the situation',
-      'Generate potential solutions based on the framework',
-      'Evaluate solutions against objectives and constraints',
-      'Implement and monitor the chosen solution'
+      "Define the problem clearly",
+      "Apply the mental model framework to analyze the situation",
+      "Generate potential solutions based on the framework",
+      "Evaluate solutions against objectives and constraints",
+      "Implement and monitor the chosen solution"
     ];
   };
 
