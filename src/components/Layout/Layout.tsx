@@ -20,7 +20,7 @@ import {
   MagnifyingGlassIcon,
   Cog6ToothIcon,
   LightBulbIcon,
-  BookmarkIcon
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { supabase } from '../../services/supabase';
 import { UserProfile } from '../../types';
@@ -53,18 +53,6 @@ const navigation = [
     description: 'Analyze geopolitical risks'
   },
   { 
-    name: 'Mental Model Advisor', 
-    href: '/mental-model-advisor', 
-    icon: LightBulbIcon,
-    description: 'AI-powered decision frameworks'
-  },
-  { 
-    name: 'Model Library', 
-    href: '/model-library', 
-    icon: BookmarkIcon,
-    description: 'Explore mental models'
-  },
-  { 
     name: 'Simulation', 
     href: '/simulation', 
     icon: CpuChipIcon,
@@ -87,6 +75,18 @@ const navigation = [
     href: '/collaboration', 
     icon: DocumentTextIcon,
     description: 'Team workspace'
+  },
+  { 
+    name: 'Mental Models', 
+    href: '/mental-models', 
+    icon: LightBulbIcon,
+    description: 'Explore mental model library'
+  },
+  { 
+    name: 'Model Advisor', 
+    href: '/mental-model-advisor', 
+    icon: SparklesIcon,
+    description: 'Get AI model recommendations'
   },
 ];
 

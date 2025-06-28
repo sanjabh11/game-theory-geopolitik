@@ -13,8 +13,7 @@ import {
   FireIcon,
   CheckCircleIcon,
   ClockIcon,
-  LightBulbIcon,
-  BookmarkIcon
+  LightBulbIcon
 } from '@heroicons/react/24/outline';
 
 const quickActions = [
@@ -39,16 +38,6 @@ const quickActions = [
     badge: 'Real-time'
   },
   {
-    name: 'Mental Model Advisor',
-    description: 'AI-powered decision framework selection',
-    icon: LightBulbIcon,
-    href: '/mental-model-advisor',
-    gradient: 'from-amber-500 via-orange-500 to-yellow-500',
-    bgPattern: 'bg-amber-50 dark:bg-amber-950/30',
-    iconBg: 'bg-amber-100 dark:bg-amber-900/50',
-    badge: 'New'
-  },
-  {
     name: 'Scenario Simulation',
     description: 'Model complex strategic outcomes',
     icon: CpuChipIcon,
@@ -69,16 +58,6 @@ const quickActions = [
     badge: 'Live'
   },
   {
-    name: 'Model Library',
-    description: 'Explore 40+ mental models',
-    icon: BookmarkIcon,
-    href: '/model-library',
-    gradient: 'from-indigo-500 via-blue-500 to-sky-500',
-    bgPattern: 'bg-indigo-50 dark:bg-indigo-950/30',
-    iconBg: 'bg-indigo-100 dark:bg-indigo-900/50',
-    badge: 'New'
-  },
-  {
     name: 'Predictive Analytics',
     description: 'Forecast trends and patterns',
     icon: ChartBarIcon,
@@ -97,6 +76,26 @@ const quickActions = [
     bgPattern: 'bg-teal-50 dark:bg-teal-950/30',
     iconBg: 'bg-teal-100 dark:bg-teal-900/50',
     badge: 'Team'
+  },
+  {
+    name: 'Mental Models',
+    description: 'Explore strategic thinking frameworks',
+    icon: LightBulbIcon,
+    href: '/mental-models',
+    gradient: 'from-amber-500 via-yellow-500 to-orange-600',
+    bgPattern: 'bg-amber-50 dark:bg-amber-950/30',
+    iconBg: 'bg-amber-100 dark:bg-amber-900/50',
+    badge: 'Library'
+  },
+  {
+    name: 'Model Advisor',
+    description: 'Get AI model recommendations',
+    icon: SparklesIcon,
+    href: '/mental-model-advisor',
+    gradient: 'from-pink-500 via-rose-500 to-red-600',
+    bgPattern: 'bg-pink-50 dark:bg-pink-950/30',
+    iconBg: 'bg-pink-100 dark:bg-pink-900/50',
+    badge: 'AI-Powered'
   }
 ];
 
@@ -144,44 +143,6 @@ const Dashboard: React.FC = () => {
         <p className="mt-2 text-gray-600">
           Welcome to the Game Theory Geopolitical Platform. Start exploring strategic analysis tools.
         </p>
-      </motion.div>
-
-      {/* Featured Section - Mental Model Advisor */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.15 }}
-        className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-200 p-6"
-      >
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="mb-6 md:mb-0 md:mr-6 flex-shrink-0">
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 w-16 h-16 rounded-full flex items-center justify-center shadow-lg">
-              <LightBulbIcon className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Mental Model Advisor</h2>
-            <p className="text-gray-700 mb-4">
-              Our new AI-powered system analyzes your problem and recommends the optimal mental models for solving it. 
-              Get tailored solutions using frameworks like First Principles, Nash Equilibrium, Systems Thinking, and more.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/mental-model-advisor"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
-              >
-                Try Mental Model Advisor
-                <ArrowRightIcon className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                to="/model-library"
-                className="inline-flex items-center px-4 py-2 border border-amber-300 text-sm font-medium rounded-md text-amber-700 bg-white hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
-              >
-                Explore Model Library
-              </Link>
-            </div>
-          </div>
-        </div>
       </motion.div>
 
       {/* Quick Actions */}
@@ -257,8 +218,20 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Explore risk assessments</p>
-              <p className="text-sm text-gray-500">Analyze current geopolitical situations</p>
+              <p className="text-sm font-medium text-gray-900">Explore mental models</p>
+              <p className="text-sm text-gray-500">Discover frameworks for strategic thinking</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                <span className="text-amber-600 font-medium text-sm">4</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Try the model advisor</p>
+              <p className="text-sm text-gray-500">Get AI recommendations for your problems</p>
             </div>
           </div>
         </div>

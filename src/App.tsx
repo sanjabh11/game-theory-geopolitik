@@ -20,8 +20,8 @@ import Collaboration from './components/Collaboration/Collaboration';
 import ProfilePage from './components/Profile/UserProfile';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
+import MentalModelLibrary from './components/MentalModels/MentalModelLibrary';
 import MentalModelAdvisor from './components/MentalModels/MentalModelAdvisor';
-import ModelLibrary from './components/MentalModels/ModelLibrary';
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -281,11 +281,11 @@ function App() {
             }
           />
           <Route
-            path="/mental-model-advisor"
+            path="/mental-models"
             element={
               authState.user ? (
                 <Layout user={authState.user} profile={authState.profile}>
-                  <MentalModelAdvisor />
+                  <MentalModelLibrary />
                 </Layout>
               ) : (
                 <Navigate to="/login" replace />
@@ -293,11 +293,11 @@ function App() {
             }
           />
           <Route
-            path="/model-library"
+            path="/mental-model-advisor"
             element={
               authState.user ? (
                 <Layout user={authState.user} profile={authState.profile}>
-                  <ModelLibrary />
+                  <MentalModelAdvisor />
                 </Layout>
               ) : (
                 <Navigate to="/login" replace />
