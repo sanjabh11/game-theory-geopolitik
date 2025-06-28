@@ -1,6 +1,6 @@
 import { ApiResponse } from '../types/api';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDmpYnphVeUXH1v4NUyhR47Jx61zIU3GYQ';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDmpYnphVeU--XH1v4NUyhR47Jx61zIU3GYQ';
 const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 export interface GeminiRequest {
