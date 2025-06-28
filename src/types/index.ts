@@ -447,6 +447,63 @@ export interface PredictiveAnalytics {
   dataFreshness: Record<string, string>;
 }
 
+// Notification Types
+export interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  category: 'system' | 'risk' | 'crisis' | 'prediction' | 'simulation';
+  read: boolean;
+  created_at: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Report Types
+export interface ReportConfig {
+  format: 'pdf' | 'csv' | 'json';
+  includeCharts: boolean;
+  includeRawData: boolean;
+  includeMethodology: boolean;
+  title: string;
+  description?: string;
+  author?: string;
+  created_at: string;
+}
+
+export interface Report {
+  id: string;
+  user_id: string;
+  title: string;
+  type: 'risk' | 'crisis' | 'simulation' | 'prediction';
+  config: ReportConfig;
+  data: Record<string, unknown>;
+  file_url?: string;
+  created_at: string;
+}
+
+// Onboarding Types
+export interface OnboardingStep {
+  id: string;
+  title: string;
+  description: string;
+  path: string;
+  element: string;
+  position: 'top' | 'bottom' | 'left' | 'right';
+  completed: boolean;
+}
+
+export interface FeatureDiscovery {
+  id: string;
+  title: string;
+  description: string;
+  path: string;
+  icon: string;
+  isNew?: boolean;
+  dismissed: boolean;
+}
+
 // API Response Types
 export interface ApiResponse<T> {
   data: T;

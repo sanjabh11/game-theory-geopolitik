@@ -23,6 +23,10 @@ import Register from './components/Auth/Register';
 import MentalModelLibrary from './components/MentalModels/MentalModelLibrary';
 import MentalModelAdvisor from './components/MentalModels/MentalModelAdvisor';
 
+// Onboarding Components
+import OnboardingTour from './components/Onboarding/OnboardingTour';
+import FeatureDiscovery from './components/Onboarding/FeatureDiscovery';
+
 // Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -308,6 +312,14 @@ function App() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+
+        {/* Onboarding Components */}
+        {authState.user && (
+          <>
+            <OnboardingTour />
+            <FeatureDiscovery />
+          </>
+        )}
 
         <Toaster
           position="top-right"

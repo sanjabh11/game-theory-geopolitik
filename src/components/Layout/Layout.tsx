@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -26,6 +26,7 @@ import { supabase } from '../../services/supabase';
 import { UserProfile } from '../../types';
 import { useTheme } from '../../contexts/ThemeContext';
 import toast from 'react-hot-toast';
+import NotificationCenter from '../Notifications/NotificationCenter';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -132,8 +133,23 @@ const ThemeToggle: React.FC = () => {
 const Layout: React.FC<LayoutProps> = ({ children, user, profile }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
   const { resolvedTheme } = useTheme();
+
+  // Check if the device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -430,13 +446,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, profile }) => {
             </div>
             
             <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <BellIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-              </motion.button>
+              <NotificationCenter />
               
               <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary-500 to-purple-600 flex items-center justify-center">
                 <UserIcon className="h-4 w-4 text-white" />
@@ -458,14 +468,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, profile }) => {
             </div>
             
             <div className="flex items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
-              >
-                <BellIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse" />
-              </motion.button>
+              <NotificationCenter />
               
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -490,6 +493,31 @@ const Layout: React.FC<LayoutProps> = ({ children, user, profile }) => {
             {children}
           </div>
         </motion.main>
+
+        {/* Mobile bottom navigation */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40">
+          <div className="grid grid-cols-5 h-16">
+            {navigation.slice(0, 5).map((item) => {
+              const current = isCurrentPath(item.href);
+              const Icon = item.icon;
+              
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex flex-col items-center justify-center ${
+                    current 
+                      ? 'text-primary-600 dark:text-primary-400' 
+                      : 'text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  <Icon className="h-6 w-6" />
+                  <span className="text-xs mt-1">{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
