@@ -49,14 +49,18 @@ const ModelLibrary: React.FC = () => {
   const loadModels = async () => {
     try {
       setLoading(true);
-      const response = await mentalModelApi.getMentalModels();
-      if (response.success && response.data) {
-        setModels(response.data);
-      }
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Use mock data for demonstration
+      const mockModels = getMockModels();
+      setModels(mockModels);
+      setFilteredModels(mockModels);
     } catch (error) {
       console.error('Failed to load models:', error);
-      // Load mock data for demonstration
+      // Load mock data as fallback
       setModels(getMockModels());
+      setFilteredModels(getMockModels());
     } finally {
       setLoading(false);
     }
@@ -101,18 +105,32 @@ const ModelLibrary: React.FC = () => {
     setSelectedModel(model);
     
     try {
-      const request: ModelExplanationRequest = {
-        model_id: model.id,
-        detail_level: 'detailed'
-      };
+      // Simulate API call for model explanation
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const response = await mentalModelApi.getModelExplanation(request);
-      if (response.success && response.data) {
-        setModelExplanation(response.data);
-      }
+      setModelExplanation({
+        abstract: model.description,
+        case_study: model.case_study || 'Case study not available',
+        limitations: model.limitations || [],
+        when_to_use: model.application_scenarios,
+        related_models: getRelatedModels(model.category)
+      });
     } catch (error) {
       console.error('Failed to get model explanation:', error);
     }
+  };
+
+  const getRelatedModels = (category: string): string[] => {
+    // Return mock related models based on category
+    const relatedModelsMap: Record<string, string[]> = {
+      'cognitive': ['Mental Models', 'Cognitive Biases', 'Decision Trees'],
+      'strategic': ['Game Theory', 'Porter\'s Five Forces', 'SWOT Analysis'],
+      'analytical': ['First Principles', 'Occam\'s Razor', 'Regression Analysis'],
+      'creative': ['Design Thinking', 'Lateral Thinking', 'SCAMPER'],
+      'systems': ['Systems Thinking', 'Feedback Loops', 'Network Theory']
+    };
+    
+    return relatedModelsMap[category] || ['No related models found'];
   };
 
   const getComplexityColor = (score: number) => {
@@ -134,10 +152,10 @@ const ModelLibrary: React.FC = () => {
 
   const getMockModels = (): MentalModel[] => [
     {
-      id: 'first-principles',
+      id: 'first_principles',
       name: 'First Principles Thinking',
       category: 'analytical',
-      complexity_score: 6,
+      complexity_score: 7,
       application_scenarios: ['Problem solving', 'Innovation', 'Decision making'],
       prompt_template: 'Break down {problem} into fundamental components...',
       performance_metrics: {
@@ -153,10 +171,10 @@ const ModelLibrary: React.FC = () => {
       updated_at: new Date().toISOString()
     },
     {
-      id: 'systems-thinking',
+      id: 'systems_thinking',
       name: 'Systems Thinking',
       category: 'systems',
-      complexity_score: 8,
+      complexity_score: 9,
       application_scenarios: ['Complex problems', 'Organizational change', 'Strategy'],
       prompt_template: 'Analyze {problem} as interconnected systems...',
       performance_metrics: {
@@ -172,21 +190,59 @@ const ModelLibrary: React.FC = () => {
       updated_at: new Date().toISOString()
     },
     {
-      id: 'design-thinking',
-      name: 'Design Thinking',
-      category: 'creative',
-      complexity_score: 5,
-      application_scenarios: ['Innovation', 'User experience', 'Product development'],
-      prompt_template: 'Apply human-centered design to {problem}...',
+      id: 'nash_equilibrium',
+      name: 'Nash Equilibrium',
+      category: 'strategic',
+      complexity_score: 8,
+      application_scenarios: ['Conflict resolution', 'Negotiation', 'Competitive strategy'],
+      prompt_template: 'Identify equilibrium states where no actor can unilaterally improve...',
+      performance_metrics: {
+        accuracy: 78,
+        relevance_score: 85,
+        usage_count: 90,
+        success_rate: 72
+      },
+      description: 'A concept in game theory where the optimal outcome occurs when there is no incentive for players to deviate from their initial strategy.',
+      limitations: ['Assumes rational actors', 'Multiple equilibria may exist'],
+      case_study: 'Used to analyze international trade negotiations and tariff strategies.',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: 'second_order_thinking',
+      name: 'Second-Order Thinking',
+      category: 'cognitive',
+      complexity_score: 6,
+      application_scenarios: ['Strategic planning', 'Risk assessment', 'Policy analysis'],
+      prompt_template: 'Consider the effects of effects for {problem}...',
       performance_metrics: {
         accuracy: 80,
         relevance_score: 85,
         usage_count: 200,
         success_rate: 82
       },
-      description: 'A human-centered approach to innovation that integrates needs, technology, and business requirements.',
-      limitations: ['May lack analytical rigor', 'Time-consuming process'],
-      case_study: 'IDEO used design thinking to redesign the shopping cart, focusing on user needs.',
+      description: 'Considering not just the immediate results of actions but the subsequent effects of those results.',
+      limitations: ['Cognitive complexity', 'Diminishing accuracy with time horizon'],
+      case_study: 'Warren Buffett uses second-order thinking to evaluate long-term investment decisions.',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: 'opportunity_cost',
+      name: 'Opportunity Cost',
+      category: 'analytical',
+      complexity_score: 5,
+      application_scenarios: ['Resource allocation', 'Decision making', 'Investment analysis'],
+      prompt_template: 'Calculate what must be given up for each alternative...',
+      performance_metrics: {
+        accuracy: 88,
+        relevance_score: 82,
+        usage_count: 180,
+        success_rate: 85
+      },
+      description: 'The loss of potential gain from other alternatives when one alternative is chosen.',
+      limitations: ['Difficult to quantify intangible costs', 'Future value uncertainty'],
+      case_study: 'Used in capital budgeting decisions to evaluate project investments.',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -347,7 +403,7 @@ const ModelLibrary: React.FC = () => {
 
                 <div>
                   <h3 className="font-medium mb-2">Case Study</h3>
-                  <p className="text-sm text-gray-700">{selectedModel.case_study}</p>
+                  <p className="text-sm text-gray-700">{selectedModel.case_study || 'No case study available'}</p>
                 </div>
 
                 <div>
@@ -362,9 +418,13 @@ const ModelLibrary: React.FC = () => {
                 <div>
                   <h3 className="font-medium mb-2">Limitations</h3>
                   <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                    {selectedModel.limitations.map((limitation, index) => (
-                      <li key={index}>{limitation}</li>
-                    ))}
+                    {selectedModel.limitations && selectedModel.limitations.length > 0 ? (
+                      selectedModel.limitations.map((limitation, index) => (
+                        <li key={index}>{limitation}</li>
+                      ))
+                    ) : (
+                      <li>No specific limitations documented</li>
+                    )}
                   </ul>
                 </div>
 
