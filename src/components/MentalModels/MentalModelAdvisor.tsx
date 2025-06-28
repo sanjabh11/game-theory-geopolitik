@@ -151,7 +151,7 @@ const MentalModelAdvisor: React.FC = () => {
   const generateApplicationSteps = (modelId: string): string[] => {
     const steps: Record<string, string[]> = {
       'first_principles': [
-        'Identify the problem and clearly articulate what you're trying to solve',
+        'Identify the problem and clearly articulate what you\'re trying to solve',
         'Break down the problem into its fundamental truths or components',
         'Question all assumptions and conventional wisdom',
         'Rebuild your solution from the ground up using only validated elements',
@@ -163,7 +163,7 @@ const MentalModelAdvisor: React.FC = () => {
         'Identify the benefits and value of each option',
         'Determine the next-best alternative to each choice',
         'Calculate what you would be giving up by making each choice',
-        'Make decisions based on the true cost (including what's foregone)'
+        'Make decisions based on the true cost (including what\'s foregone)'
       ],
       
       'nash_equilibrium': [
