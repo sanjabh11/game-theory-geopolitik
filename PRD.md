@@ -240,6 +240,20 @@ CREATE TABLE mental_models (
 );
 ```
 
+**notifications**
+```sql
+CREATE TABLE notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users NOT NULL,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('info', 'success', 'warning', 'error')),
+    category TEXT NOT NULL CHECK (category IN ('system', 'risk', 'crisis', 'prediction', 'simulation')),
+    read BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
 ### API Integrations
 
 #### Google Gemini API

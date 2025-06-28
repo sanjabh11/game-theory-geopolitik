@@ -46,7 +46,7 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
    - Real-time discussions and commenting
    - Task management and workflow tracking
    - Version control for analyses
-   - AI-powered insights generation
+   - AI-powered insight generation
 
 7. **Mental Models Library & Advisor**
    - Comprehensive mental model library
@@ -62,7 +62,7 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
 - **Vite** for fast development and optimized builds
 - **Tailwind CSS** for responsive, modern styling
 - **Framer Motion** for smooth animations and interactions
-- **React Router** for client-side navigation
+- **React Router** for client-side routing
 - **React Query** for efficient data fetching and caching
 - **React Hot Toast** for user notifications
 
@@ -126,7 +126,7 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
 ### Getting Started
 
 1. **Create Account**: Register with email and select your role
-2. **Complete Profile**: Add organization and preferences
+2. **Complete Profile**: Add your organization and preferences
 3. **Start Tutorial**: Learn game theory fundamentals
 4. **Explore Features**: Navigate between analysis tools
 5. **Set Up Monitoring**: Configure alerts for your regions of interest
@@ -188,12 +188,6 @@ npm run lint         # Run ESLint
 npm run type-check   # TypeScript type checking
 ```
 
-### Code Quality
-- **TypeScript**: Strict type checking enabled
-- **ESLint**: Consistent code style enforcement
-- **Prettier**: Automatic code formatting
-- **Git Hooks**: Pre-commit quality checks
-
 ## 🚀 Deployment
 
 See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed deployment instructions.
@@ -210,23 +204,6 @@ See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed deployment instructi
 3. Commit changes: `git commit -m 'Add amazing feature'`
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
-
-### Development Guidelines
-- Follow TypeScript best practices
-- Write comprehensive tests
-- Update documentation for new features
-- Use conventional commit messages
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Documentation**: Check README and inline comments
-- **Issues**: Report bugs via GitHub Issues
-- **Discussions**: Join community discussions
-- **Contact**: Reach out to the development team
 
 ---
 
