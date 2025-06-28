@@ -4,6 +4,7 @@ import { newsApi } from '../../services/newsApi';
 import { economicApi } from '../../services/economicApi';
 import { geminiApi } from '../../services/geminiApi';
 import { RiskAssessment as RiskAssessmentType, RiskFactor } from '../../types/api';
+
 const RiskAssessment: React.FC = () => {
   const [riskData, setRiskData] = useState<RiskAssessmentType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,7 +91,7 @@ const RiskAssessment: React.FC = () => {
         }
 
         // Create detailed risk factors
-        const riskFactors: RiskFactor[] = analysisData.riskFactors.map((factor, index) => {
+        const riskFactors: RiskFactor[] = analysisData.riskFactors.map((factor: string, index: number) => {
           const factorDetails = getFactorDetails(factor, selectedRegion);
           return {
             id: `risk-${selectedRegion}-${index}`,
@@ -114,7 +115,7 @@ const RiskAssessment: React.FC = () => {
                     analysisData.riskScore > 25 ? 'moderate' : 'low',
           confidence: analysisData.confidence,
           factors: riskFactors,
-          trends: analysisData.riskFactors.map((factor) => ({
+          trends: analysisData.riskFactors.map((factor: string) => ({
             factor,
             direction: getTrendDirection(factor, selectedRegion),
             rate: getTrendRate(factor, selectedRegion)
@@ -300,22 +301,43 @@ const RiskAssessment: React.FC = () => {
         transition={{ duration: 0.6, delay: 0.1 }}
         className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
       >
-        <h2 className="text-lg font-semibold mb-4">Select Region</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {regions.map((region) => (
-            <button
-              key={region.code}
-              onClick={() => setSelectedRegion(region.code)}
-              className={`p-3 rounded-lg border text-center transition-colors ${
-                selectedRegion === region.code
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="font-medium">{region.name}</div>
-              <div className="text-sm text-gray-500">{region.code}</div>
-            </button>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Region</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {regions.map((region) => (
+                <button
+                  key={region.code}
+                  onClick={() => setSelectedRegion(region.code)}
+                  className={`p-3 rounded-lg border text-center transition-colors ${
+                    selectedRegion === region.code
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-medium">{region.name}</div>
+                  <div className="text-sm text-gray-500">{region.code}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Data Sources</label>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <div className="flex items-center mb-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                <span className="text-sm font-medium text-blue-800">Economic Indicators</span>
+              </div>
+              <div className="flex items-center mb-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-sm font-medium text-blue-800">News Analysis</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                <span className="text-sm font-medium text-blue-800">AI-Enhanced Risk Modeling</span>
+              </div>
+            </div>
+          </div>
         </div>
       </motion.div>
 
