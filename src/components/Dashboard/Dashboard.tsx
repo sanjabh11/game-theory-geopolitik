@@ -12,7 +12,9 @@ import {
   SparklesIcon,
   FireIcon,
   CheckCircleIcon,
-  ClockIcon
+  ClockIcon,
+  LightBulbIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline';
 
 const quickActions = [
@@ -75,6 +77,26 @@ const quickActions = [
     bgPattern: 'bg-teal-50 dark:bg-teal-950/30',
     iconBg: 'bg-teal-100 dark:bg-teal-900/50',
     badge: 'Team'
+  },
+  {
+    name: 'Mental Model Advisor',
+    description: 'AI-powered decision-making system',
+    icon: LightBulbIcon,
+    href: '/mental-models',
+    gradient: 'from-pink-500 via-purple-500 to-indigo-600',
+    bgPattern: 'bg-pink-50 dark:bg-pink-950/30',
+    iconBg: 'bg-pink-100 dark:bg-pink-900/50',
+    badge: 'NEW'
+  },
+  {
+    name: 'Model Library',
+    description: 'Browse 40+ mental models',
+    icon: AcademicCapIcon,
+    href: '/model-library',
+    gradient: 'from-indigo-500 via-blue-500 to-cyan-600',
+    bgPattern: 'bg-indigo-50 dark:bg-indigo-950/30',
+    iconBg: 'bg-indigo-100 dark:bg-indigo-900/50',
+    badge: 'Explore'
   }
 ];
 
@@ -120,8 +142,51 @@ const Dashboard: React.FC = () => {
       >
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-2 text-gray-600">
-          Welcome to the Game Theory Geopolitical Platform. Start exploring strategic analysis tools.
+          Welcome to the Game Theory Geopolitical Platform. Start exploring strategic analysis tools and AI-powered decision making.
         </p>
+      </motion.div>
+
+      {/* Featured: Mental Model Advisor */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden"
+      >
+        <div className="relative z-10">
+          <div className="flex items-center mb-4">
+            <div className="bg-white/20 p-3 rounded-full">
+              <LightBulbIcon className="h-8 w-8 text-white" />
+            </div>
+            <span className="ml-4 bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
+              NEW FEATURE
+            </span>
+          </div>
+          <h2 className="text-3xl font-bold mb-4">Mental Model Advisor</h2>
+          <p className="text-lg mb-6 text-white/90 max-w-2xl">
+            Autonomous decision-making system that selects optimal mental models from our curated library of 40+ frameworks to solve your complex problems.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              to="/mental-models"
+              className="inline-flex items-center px-6 py-3 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Try Mental Model Advisor
+              <ArrowRightIcon className="ml-2 h-5 w-5" />
+            </Link>
+            <Link
+              to="/model-library"
+              className="inline-flex items-center px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-colors"
+            >
+              Browse Model Library
+              <AcademicCapIcon className="ml-2 h-5 w-5" />
+            </Link>
+          </div>
+        </div>
+        
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
       </motion.div>
 
       {/* Quick Actions */}
@@ -148,6 +213,16 @@ const Dashboard: React.FC = () => {
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-gray-900">{action.name}</h3>
                 <p className="mt-2 text-sm text-gray-600">{action.description}</p>
+                
+                {/* Badge */}
+                <span className={`inline-block mt-3 px-2 py-1 text-xs font-medium rounded-full ${
+                  action.badge === 'NEW' ? 'bg-pink-100 text-pink-800' :
+                  action.badge === 'Real-time' ? 'bg-green-100 text-green-800' :
+                  action.badge === 'Advanced' ? 'bg-purple-100 text-purple-800' :
+                  'bg-blue-100 text-blue-800'
+                }`}>
+                  {action.badge}
+                </span>
                 
                 {/* Hover effect */}
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
@@ -185,8 +260,8 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Start with the tutorial</p>
-              <p className="text-sm text-gray-500">Learn game theory fundamentals</p>
+              <p className="text-sm font-medium text-gray-900">Try the Mental Model Advisor</p>
+              <p className="text-sm text-gray-500">Submit a complex problem and get AI-powered solutions</p>
             </div>
           </div>
           
@@ -197,8 +272,20 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Explore risk assessments</p>
-              <p className="text-sm text-gray-500">Analyze current geopolitical situations</p>
+              <p className="text-sm font-medium text-gray-900">Explore the Model Library</p>
+              <p className="text-sm text-gray-500">Browse 40+ mental models for decision-making</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                <span className="text-orange-600 font-medium text-sm">4</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Start with the tutorial</p>
+              <p className="text-sm text-gray-500">Learn game theory fundamentals</p>
             </div>
           </div>
         </div>

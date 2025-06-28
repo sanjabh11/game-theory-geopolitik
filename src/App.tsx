@@ -21,6 +21,10 @@ import ProfilePage from './components/Profile/UserProfile';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 
+// Mental Model Components
+import MentalModelAdvisor from './components/MentalModels/MentalModelAdvisor';
+import ModelLibrary from './components/MentalModels/ModelLibrary';
+
 // Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -260,6 +264,30 @@ function App() {
               authState.user ? (
                 <Layout user={authState.user} profile={authState.profile}>
                   <Collaboration />
+                </Layout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/mental-models"
+            element={
+              authState.user ? (
+                <Layout user={authState.user} profile={authState.profile}>
+                  <MentalModelAdvisor />
+                </Layout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/model-library"
+            element={
+              authState.user ? (
+                <Layout user={authState.user} profile={authState.profile}>
+                  <ModelLibrary />
                 </Layout>
               ) : (
                 <Navigate to="/login" replace />

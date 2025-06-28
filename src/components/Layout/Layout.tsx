@@ -18,7 +18,9 @@ import {
   ComputerDesktopIcon,
   BellIcon,
   MagnifyingGlassIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  LightBulbIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline';
 import { supabase } from '../../services/supabase';
 import { UserProfile } from '../../types';
@@ -73,6 +75,18 @@ const navigation = [
     href: '/collaboration', 
     icon: DocumentTextIcon,
     description: 'Team workspace'
+  },
+  { 
+    name: 'Mental Models', 
+    href: '/mental-models', 
+    icon: LightBulbIcon,
+    description: 'AI decision advisor'
+  },
+  { 
+    name: 'Model Library', 
+    href: '/model-library', 
+    icon: AcademicCapIcon,
+    description: 'Browse mental models'
   },
 ];
 
