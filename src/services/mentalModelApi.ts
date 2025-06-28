@@ -133,7 +133,7 @@ export class MentalModelApiService {
         success_rate: 79,
         relevance_score: 81
       },
-      description: 'A problem-solving technique where you look at the problem backward, focusing on avoiding what you don't want rather than pursuing what you do want.',
+      description: `A problem-solving technique where you look at the problem backward, focusing on avoiding what you don't want rather than pursuing what you do want.`,
       limitations: ['May miss positive opportunities', 'Can lead to overly cautious approaches', 'Requires thorough understanding of failure modes']
     },
     {
