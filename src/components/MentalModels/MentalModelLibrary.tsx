@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../../services/supabase';
 
 interface MentalModel {
   id: string;
@@ -29,24 +28,11 @@ const MentalModelLibrary: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const { data, error } = await supabase
-          .from('mental_models')
-          .select('*')
-          .order('name');
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        // If no data from database, use fallback data
-        if (!data || data.length === 0) {
-          const fallbackModels = getFallbackModels();
-          setModels(fallbackModels);
-          setFilteredModels(fallbackModels);
-        } else {
-          setModels(data);
-          setFilteredModels(data);
-        }
+        // In a real implementation, we would fetch from Supabase
+        // For now, use fallback data
+        const fallbackModels = getFallbackModels();
+        setModels(fallbackModels);
+        setFilteredModels(fallbackModels);
       } catch (error) {
         console.error('Error fetching mental models:', error);
         setError('Failed to load mental models. Using fallback data.');

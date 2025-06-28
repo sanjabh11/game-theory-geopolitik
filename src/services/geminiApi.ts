@@ -1,6 +1,6 @@
 import { ApiResponse } from '../types/api';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDoiun_JfHVh2TRh4eqsOjaqCRAA1hSa0Y';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDmpYnphVeUXH1v4NUyhR47Jx61zIU3GYQ';
 const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 export interface GeminiRequest {
@@ -260,6 +260,57 @@ export class GeminiApiService {
           "Scope creep due to unclear boundaries",
           "Resource constraints affecting commitment levels"
         ]
+      });
+    } else if (promptLower.includes('mental model') || promptLower.includes('problem')) {
+      return JSON.stringify({
+        recommendedModels: [
+          {
+            modelId: "first_principles",
+            modelName: "First Principles",
+            relevanceScore: 85,
+            explanation: "This problem requires breaking down complex elements into fundamental components.",
+            applicationSteps: [
+              "Identify the problem and clearly articulate what you're trying to solve",
+              "Break down the problem into its fundamental truths or components",
+              "Question all assumptions and conventional wisdom",
+              "Rebuild your solution from the ground up using only validated elements",
+              "Test your solution against the original problem constraints"
+            ]
+          },
+          {
+            modelId: "systems_thinking",
+            modelName: "Systems Thinking",
+            relevanceScore: 75,
+            explanation: "The interconnected nature of the described situation suggests systems thinking would be valuable.",
+            applicationSteps: [
+              "Define the system boundaries and key components",
+              "Map relationships and connections between components",
+              "Identify feedback loops (reinforcing and balancing)",
+              "Analyze how changes propagate through the system",
+              "Look for leverage points where small changes create large effects"
+            ]
+          },
+          {
+            modelId: "second_order_thinking",
+            modelName: "Second-Order Thinking",
+            relevanceScore: 68,
+            explanation: "This problem requires looking beyond immediate effects to understand cascading impacts.",
+            applicationSteps: [
+              "Identify the immediate or first-order consequences of actions",
+              "For each consequence, determine its subsequent effects",
+              "Map cascading impacts across different timeframes",
+              "Consider how systems and people will adapt to the changes",
+              "Identify potential unintended consequences and prepare mitigations"
+            ]
+          }
+        ],
+        problemAnalysis: "The problem presents multiple interconnected factors requiring systematic analysis. Breaking down to first principles while considering system dynamics would be beneficial.",
+        structuredData: {
+          coreIssue: "Need to determine optimal approach to complex situation with multiple variables",
+          constraints: ["Time limitations", "Resource constraints", "Stakeholder expectations"],
+          problemType: "Strategic decision-making",
+          complexityLevel: 7
+        }
       });
     } else {
       // Generic fallback response
@@ -709,6 +760,7 @@ Format as JSON:
       modelName: string;
       relevanceScore: number;
       explanation: string;
+      applicationSteps: string[];
     }>;
     problemAnalysis: string;
     structuredData: {
@@ -746,7 +798,8 @@ Format as JSON:
       "modelId": "model_id",
       "modelName": "Model Name",
       "relevanceScore": number (0-100),
-      "explanation": "Why this model is relevant"
+      "explanation": "Why this model is relevant",
+      "applicationSteps": ["step1", "step2", "step3", "step4", "step5"]
     }
   ],
   "problemAnalysis": "Overall analysis of the problem",
@@ -777,13 +830,27 @@ Format as JSON:
                 modelId: "first_principles",
                 modelName: "First Principles",
                 relevanceScore: 85,
-                explanation: "This problem requires breaking down complex elements into fundamental components."
+                explanation: "This problem requires breaking down complex elements into fundamental components.",
+                applicationSteps: [
+                  "Identify the problem and clearly articulate what you're trying to solve",
+                  "Break down the problem into its fundamental truths or components",
+                  "Question all assumptions and conventional wisdom",
+                  "Rebuild your solution from the ground up using only validated elements",
+                  "Test your solution against the original problem constraints"
+                ]
               },
               {
                 modelId: "systems_thinking",
                 modelName: "Systems Thinking",
                 relevanceScore: 75,
-                explanation: "The interconnected nature of the described situation suggests systems thinking would be valuable."
+                explanation: "The interconnected nature of the described situation suggests systems thinking would be valuable.",
+                applicationSteps: [
+                  "Define the system boundaries and key components",
+                  "Map relationships and connections between components",
+                  "Identify feedback loops (reinforcing and balancing)",
+                  "Analyze how changes propagate through the system",
+                  "Look for leverage points where small changes create large effects"
+                ]
               }
             ],
             problemAnalysis: "The problem presents multiple interconnected factors requiring systematic analysis. Breaking down to first principles while considering system dynamics would be beneficial.",

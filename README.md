@@ -2,11 +2,7 @@
 
 A comprehensive platform for geopolitical analysis, strategic modeling, and crisis monitoring using game theory principles and AI-powered insights.
 
-## 🚀 New Features & Enhancements
-
-1. **Responsive Design & Dark Mode**
-- Fully responsive UI with mobile optimization and dark mode support.
-- Enhanced transitions and animations using Framer Motion.
+## 🚀 Features & Capabilities
 
 ### Core Functionality
 
@@ -51,6 +47,13 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
    - Task management and workflow tracking
    - Version control for analyses
    - AI-powered insights generation
+
+7. **Mental Models Library & Advisor**
+   - Comprehensive mental model library
+   - AI-powered model selection advisor
+   - Application steps and guidance
+   - Categorization and filtering
+   - Relevance scoring and recommendations
 
 ## 🛠 Technology Stack
 
@@ -109,37 +112,12 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
    # Data Sources
    VITE_NEWS_API_KEY=your_news_api_key
    VITE_ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
-   VITE_REDDIT_API_KEY=your_reddit_api_key
 
    # Development
    NODE_ENV=development
-   LOG_LEVEL=debug
    ```
 
-3. **Database Setup**
-   
-   Execute in your Supabase SQL editor:
-   ```sql
-   -- Create user profiles table
-   CREATE TABLE user_profiles (
-     id UUID REFERENCES auth.users(id) PRIMARY KEY,
-     role TEXT NOT NULL CHECK (role IN ('student', 'professor', 'analyst', 'policymaker', 'researcher')),
-     organization TEXT,
-     preferences JSONB DEFAULT '{}',
-     notification_settings JSONB DEFAULT '{"email": true, "push": false, "sms": false}',
-     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-   );
-
-   -- Enable Row Level Security
-   ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
-
-   -- Create policy for user access
-   CREATE POLICY "Users can view and update own profile" ON user_profiles
-   USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
-   ```
-
-4. **Start Development**
+3. **Start Development**
    ```bash
    npm run dev
    ```
@@ -160,6 +138,7 @@ A comprehensive platform for geopolitical analysis, strategic modeling, and cris
 - **Scenario Planning**: Choose templates → Configure parameters → Run simulations
 - **Crisis Monitoring**: Set keywords → Define thresholds → Receive alerts
 - **Collaboration**: Create workspace → Invite team → Share analyses
+- **Mental Models**: Explore library → Get AI recommendations → Apply to problems
 
 ## 🏗 Architecture
 
@@ -175,6 +154,7 @@ src/
 │   ├── Crisis/            # Crisis monitoring dashboard
 │   ├── Analytics/         # Predictive analytics
 │   ├── Collaboration/     # Team workspace
+│   ├── MentalModels/      # Mental models library and advisor
 │   └── Layout/            # Shared layout components
 ├── services/              # API integration layer
 ├── types/                 # TypeScript type definitions
@@ -225,12 +205,7 @@ npm run type-check   # TypeScript type checking
 
 ## 🚀 Deployment
 
-### Production Deployment
-1. Build the application: `npm run build`
-2. Deploy to hosting platform (Vercel, Netlify, etc.)
-3. Configure environment variables
-4. Set up domain and SSL
-5. Enable monitoring and analytics
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed deployment instructions.
 
 ### Recommended Hosting
 - **Vercel**: Optimal for React applications
