@@ -20,7 +20,7 @@ import {
   MagnifyingGlassIcon,
   Cog6ToothIcon,
   LightBulbIcon,
-  AcademicCapIcon
+  BookmarkIcon
 } from '@heroicons/react/24/outline';
 import { supabase } from '../../services/supabase';
 import { UserProfile } from '../../types';
@@ -77,15 +77,15 @@ const navigation = [
     description: 'Team workspace'
   },
   { 
-    name: 'Mental Models', 
-    href: '/mental-models', 
+    name: 'Mental Model Advisor', 
+    href: '/mental-model-advisor', 
     icon: LightBulbIcon,
-    description: 'AI decision advisor'
+    description: 'AI-powered decision support'
   },
   { 
     name: 'Model Library', 
     href: '/model-library', 
-    icon: AcademicCapIcon,
+    icon: BookmarkIcon,
     description: 'Browse mental models'
   },
 ];

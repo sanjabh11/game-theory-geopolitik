@@ -20,8 +20,6 @@ import Collaboration from './components/Collaboration/Collaboration';
 import ProfilePage from './components/Profile/UserProfile';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
-
-// Mental Model Components
 import MentalModelAdvisor from './components/MentalModels/MentalModelAdvisor';
 import ModelLibrary from './components/MentalModels/ModelLibrary';
 
@@ -271,7 +269,19 @@ function App() {
             }
           />
           <Route
-            path="/mental-models"
+            path="/profile"
+            element={
+              authState.user ? (
+                <Layout user={authState.user} profile={authState.profile}>
+                  <ProfilePage />
+                </Layout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/mental-model-advisor"
             element={
               authState.user ? (
                 <Layout user={authState.user} profile={authState.profile}>
@@ -288,18 +298,6 @@ function App() {
               authState.user ? (
                 <Layout user={authState.user} profile={authState.profile}>
                   <ModelLibrary />
-                </Layout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              authState.user ? (
-                <Layout user={authState.user} profile={authState.profile}>
-                  <ProfilePage />
                 </Layout>
               ) : (
                 <Navigate to="/login" replace />

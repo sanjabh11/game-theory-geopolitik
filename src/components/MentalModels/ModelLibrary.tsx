@@ -1,136 +1,134 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
+import { 
+  MagnifyingGlassIcon, 
+  AdjustmentsHorizontalIcon,
   BookOpenIcon,
   ChartBarIcon,
-  LightBulbIcon,
-  CogIcon,
-  UserGroupIcon
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon,
+  CheckCircleIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline';
 import { mentalModelApi } from '../../services/mentalModelApi';
-import { MentalModel, ModelExplanationRequest } from '../../types/mentalModels';
+
+interface MentalModel {
+  id: string;
+  name: string;
+  category: string;
+  complexity_score: number;
+  description: string;
+  application_scenarios: string[];
+  performance_metrics: {
+    accuracy: number;
+    usage_count: number;
+    success_rate: number;
+    relevance_score: number;
+  };
+  limitations: string[];
+  case_study?: string;
+}
 
 const ModelLibrary: React.FC = () => {
   const [models, setModels] = useState<MentalModel[]>([]);
   const [filteredModels, setFilteredModels] = useState<MentalModel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedComplexity, setSelectedComplexity] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [complexityFilter, setComplexityFilter] = useState('all');
   const [selectedModel, setSelectedModel] = useState<MentalModel | null>(null);
-  const [modelExplanation, setModelExplanation] = useState<any>(null);
+  const [isDetailView, setIsDetailView] = useState(false);
 
   const categories = [
-    { value: 'all', label: 'All Categories', icon: BookOpenIcon },
-    { value: 'cognitive', label: 'Cognitive', icon: LightBulbIcon },
-    { value: 'strategic', label: 'Strategic', icon: ChartBarIcon },
-    { value: 'analytical', label: 'Analytical', icon: CogIcon },
-    { value: 'creative', label: 'Creative', icon: UserGroupIcon },
-    { value: 'systems', label: 'Systems', icon: FunnelIcon }
+    { id: 'all', name: 'All Categories' },
+    { id: 'cognitive', name: 'Cognitive' },
+    { id: 'strategic', name: 'Strategic' },
+    { id: 'analytical', name: 'Analytical' },
+    { id: 'creative', name: 'Creative' },
+    { id: 'systems', name: 'Systems' }
   ];
 
   const complexityLevels = [
-    { value: 'all', label: 'All Levels' },
-    { value: 'low', label: 'Beginner (1-3)' },
-    { value: 'medium', label: 'Intermediate (4-7)' },
-    { value: 'high', label: 'Advanced (8-10)' }
+    { id: 'all', name: 'All Levels' },
+    { id: 'beginner', name: 'Beginner (1-3)' },
+    { id: 'intermediate', name: 'Intermediate (4-7)' },
+    { id: 'advanced', name: 'Advanced (8-10)' }
   ];
 
   useEffect(() => {
-    loadModels();
+    const fetchModels = async () => {
+      try {
+        setLoading(true);
+        const response = await mentalModelApi.getModels();
+        
+        if (response.success && response.data) {
+          setModels(response.data);
+          setFilteredModels(response.data);
+        } else {
+          throw new Error(response.error || 'Failed to fetch mental models');
+        }
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModels();
   }, []);
 
   useEffect(() => {
-    filterModels();
-  }, [models, searchTerm, selectedCategory, selectedComplexity]);
-
-  const loadModels = async () => {
-    try {
-      setLoading(true);
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Use mock data for demonstration
-      const mockModels = getMockModels();
-      setModels(mockModels);
-      setFilteredModels(mockModels);
-    } catch (error) {
-      console.error('Failed to load models:', error);
-      // Load mock data as fallback
-      setModels(getMockModels());
-      setFilteredModels(getMockModels());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterModels = () => {
-    let filtered = models;
-
-    // Filter by search term
+    // Apply filters
+    let result = [...models];
+    
+    // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(model =>
-        model.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        model.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        model.application_scenarios.some(scenario =>
-          scenario.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+      const term = searchTerm.toLowerCase();
+      result = result.filter(model => 
+        model.name.toLowerCase().includes(term) || 
+        model.description.toLowerCase().includes(term) ||
+        model.application_scenarios.some(scenario => scenario.toLowerCase().includes(term))
       );
     }
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(model => model.category === selectedCategory);
+    
+    // Category filter
+    if (categoryFilter !== 'all') {
+      result = result.filter(model => model.category === categoryFilter);
     }
-
-    // Filter by complexity
-    if (selectedComplexity !== 'all') {
-      const complexityRanges = {
-        low: [1, 3],
-        medium: [4, 7],
-        high: [8, 10]
-      };
-      const [min, max] = complexityRanges[selectedComplexity as keyof typeof complexityRanges];
-      filtered = filtered.filter(model => 
-        model.complexity_score >= min && model.complexity_score <= max
-      );
+    
+    // Complexity filter
+    if (complexityFilter !== 'all') {
+      switch (complexityFilter) {
+        case 'beginner':
+          result = result.filter(model => model.complexity_score >= 1 && model.complexity_score <= 3);
+          break;
+        case 'intermediate':
+          result = result.filter(model => model.complexity_score >= 4 && model.complexity_score <= 7);
+          break;
+        case 'advanced':
+          result = result.filter(model => model.complexity_score >= 8 && model.complexity_score <= 10);
+          break;
+      }
     }
+    
+    setFilteredModels(result);
+  }, [models, searchTerm, categoryFilter, complexityFilter]);
 
-    setFilteredModels(filtered);
-  };
-
-  const handleModelSelect = async (model: MentalModel) => {
+  const handleModelClick = (model: MentalModel) => {
     setSelectedModel(model);
-    
-    try {
-      // Simulate API call for model explanation
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setModelExplanation({
-        abstract: model.description,
-        case_study: model.case_study || 'Case study not available',
-        limitations: model.limitations || [],
-        when_to_use: model.application_scenarios,
-        related_models: getRelatedModels(model.category)
-      });
-    } catch (error) {
-      console.error('Failed to get model explanation:', error);
-    }
+    setIsDetailView(true);
   };
 
-  const getRelatedModels = (category: string): string[] => {
-    // Return mock related models based on category
-    const relatedModelsMap: Record<string, string[]> = {
-      'cognitive': ['Mental Models', 'Cognitive Biases', 'Decision Trees'],
-      'strategic': ['Game Theory', 'Porter\'s Five Forces', 'SWOT Analysis'],
-      'analytical': ['First Principles', 'Occam\'s Razor', 'Regression Analysis'],
-      'creative': ['Design Thinking', 'Lateral Thinking', 'SCAMPER'],
-      'systems': ['Systems Thinking', 'Feedback Loops', 'Network Theory']
-    };
-    
-    return relatedModelsMap[category] || ['No related models found'];
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'cognitive': return 'bg-purple-100 text-purple-800';
+      case 'strategic': return 'bg-blue-100 text-blue-800';
+      case 'analytical': return 'bg-green-100 text-green-800';
+      case 'creative': return 'bg-yellow-100 text-yellow-800';
+      case 'systems': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   const getComplexityColor = (score: number) => {
@@ -139,125 +137,16 @@ const ModelLibrary: React.FC = () => {
     return 'bg-red-100 text-red-800';
   };
 
-  const getCategoryIcon = (category: string) => {
-    const categoryMap = {
-      cognitive: LightBulbIcon,
-      strategic: ChartBarIcon,
-      analytical: CogIcon,
-      creative: UserGroupIcon,
-      systems: FunnelIcon
-    };
-    return categoryMap[category as keyof typeof categoryMap] || BookOpenIcon;
-  };
-
-  const getMockModels = (): MentalModel[] => [
-    {
-      id: 'first_principles',
-      name: 'First Principles Thinking',
-      category: 'analytical',
-      complexity_score: 7,
-      application_scenarios: ['Problem solving', 'Innovation', 'Decision making'],
-      prompt_template: 'Break down {problem} into fundamental components...',
-      performance_metrics: {
-        accuracy: 85,
-        relevance_score: 90,
-        usage_count: 150,
-        success_rate: 78
-      },
-      description: 'A reasoning method that breaks down complex problems into basic elements and builds up from there.',
-      limitations: ['Time-intensive', 'May overlook practical constraints'],
-      case_study: 'Elon Musk used first principles to revolutionize rocket design by questioning fundamental assumptions about cost.',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: 'systems_thinking',
-      name: 'Systems Thinking',
-      category: 'systems',
-      complexity_score: 9,
-      application_scenarios: ['Complex problems', 'Organizational change', 'Strategy'],
-      prompt_template: 'Analyze {problem} as interconnected systems...',
-      performance_metrics: {
-        accuracy: 82,
-        relevance_score: 88,
-        usage_count: 120,
-        success_rate: 75
-      },
-      description: 'A holistic approach that views problems as part of larger interconnected systems.',
-      limitations: ['Can be overwhelming', 'Requires broad perspective'],
-      case_study: 'Toyota Production System uses systems thinking to optimize manufacturing processes.',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: 'nash_equilibrium',
-      name: 'Nash Equilibrium',
-      category: 'strategic',
-      complexity_score: 8,
-      application_scenarios: ['Conflict resolution', 'Negotiation', 'Competitive strategy'],
-      prompt_template: 'Identify equilibrium states where no actor can unilaterally improve...',
-      performance_metrics: {
-        accuracy: 78,
-        relevance_score: 85,
-        usage_count: 90,
-        success_rate: 72
-      },
-      description: 'A concept in game theory where the optimal outcome occurs when there is no incentive for players to deviate from their initial strategy.',
-      limitations: ['Assumes rational actors', 'Multiple equilibria may exist'],
-      case_study: 'Used to analyze international trade negotiations and tariff strategies.',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: 'second_order_thinking',
-      name: 'Second-Order Thinking',
-      category: 'cognitive',
-      complexity_score: 6,
-      application_scenarios: ['Strategic planning', 'Risk assessment', 'Policy analysis'],
-      prompt_template: 'Consider the effects of effects for {problem}...',
-      performance_metrics: {
-        accuracy: 80,
-        relevance_score: 85,
-        usage_count: 200,
-        success_rate: 82
-      },
-      description: 'Considering not just the immediate results of actions but the subsequent effects of those results.',
-      limitations: ['Cognitive complexity', 'Diminishing accuracy with time horizon'],
-      case_study: 'Warren Buffett uses second-order thinking to evaluate long-term investment decisions.',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: 'opportunity_cost',
-      name: 'Opportunity Cost',
-      category: 'analytical',
-      complexity_score: 5,
-      application_scenarios: ['Resource allocation', 'Decision making', 'Investment analysis'],
-      prompt_template: 'Calculate what must be given up for each alternative...',
-      performance_metrics: {
-        accuracy: 88,
-        relevance_score: 82,
-        usage_count: 180,
-        success_rate: 85
-      },
-      description: 'The loss of potential gain from other alternatives when one alternative is chosen.',
-      limitations: ['Difficult to quantify intangible costs', 'Future value uncertainty'],
-      case_study: 'Used in capital budgeting decisions to evaluate project investments.',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ];
-
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="max-w-6xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
+        className="text-center mb-8"
       >
-        <h1 className="text-3xl font-bold text-gray-900">Mental Model Library</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mental Model Library</h1>
+        <p className="text-gray-600">
           Explore our curated collection of 40+ mental models for complex problem-solving.
         </p>
       </motion.div>
@@ -267,202 +156,277 @@ const ModelLibrary: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Search */}
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+            </div>
             <input
               type="text"
-              placeholder="Search models..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Search models..."
             />
           </div>
-
-          {/* Category Filter */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            {categories.map(category => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-
-          {/* Complexity Filter */}
-          <select
-            value={selectedComplexity}
-            onChange={(e) => setSelectedComplexity(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            {complexityLevels.map(level => (
-              <option key={level.value} value={level.value}>
-                {level.label}
-              </option>
-            ))}
-          </select>
+          
+          <div className="flex-1 flex gap-4">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+            </select>
+            
+            <select
+              value={complexityFilter}
+              onChange={(e) => setComplexityFilter(e.target.value)}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              {complexityLevels.map((level) => (
+                <option key={level.id} value={level.id}>{level.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Model List */}
-        <div className="lg:col-span-2">
-          {loading ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading mental models...</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredModels.map((model, index) => {
-                const CategoryIcon = getCategoryIcon(model.category);
-                return (
-                  <motion.div
-                    key={model.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer transition-all hover:shadow-md ${
-                      selectedModel?.id === model.id ? 'ring-2 ring-blue-500' : ''
-                    }`}
-                    onClick={() => handleModelSelect(model)}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="bg-blue-100 p-2 rounded-lg">
-                          <CategoryIcon className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{model.name}</h3>
-                          <p className="text-sm text-gray-500 capitalize">{model.category}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${getComplexityColor(model.complexity_score)}`}>
-                          Level {model.complexity_score}
-                        </span>
-                        <div className="text-sm text-gray-500">
-                          {model.performance_metrics.success_rate}% success
-                        </div>
-                      </div>
-                    </div>
+      {/* Model Grid or Detail View */}
+      {loading ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center"
+        >
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading mental models...</p>
+        </motion.div>
+      ) : error ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-red-50 rounded-xl border border-red-200 p-8 text-center"
+        >
+          <p className="text-red-600">{error}</p>
+        </motion.div>
+      ) : isDetailView && selectedModel ? (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">{selectedModel.name}</h2>
+            <button
+              onClick={() => setIsDetailView(false)}
+              className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              <ArrowsPointingInIcon className="h-5 w-5 mr-1" />
+              Back to Library
+            </button>
+          </div>
 
-                    <p className="text-gray-700 mb-4">{model.description}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className={`px-3 py-1 rounded-full text-sm ${getCategoryColor(selectedModel.category)}`}>
+                    {selectedModel.category}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-sm ${getComplexityColor(selectedModel.complexity_score)}`}>
+                    Complexity: {selectedModel.complexity_score}/10
+                  </span>
+                </div>
+                
+                <p className="text-gray-700">{selectedModel.description}</p>
+              </div>
 
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {model.application_scenarios.slice(0, 3).map((scenario, scenarioIndex) => (
-                        <span
-                          key={scenarioIndex}
-                          className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-                        >
-                          {scenario}
-                        </span>
-                      ))}
-                    </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Application Scenarios</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedModel.application_scenarios.map((scenario, index) => (
+                    <span key={index} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                      {scenario}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>Used {model.performance_metrics.usage_count} times</span>
-                      <span>Accuracy: {model.performance_metrics.accuracy}%</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Limitations</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  {selectedModel.limitations.map((limitation, index) => (
+                    <li key={index}>{limitation}</li>
+                  ))}
+                </ul>
+              </div>
 
-              {filteredModels.length === 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                  <BookOpenIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No models found matching your criteria.</p>
+              {selectedModel.case_study && (
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">Case Study</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p className="text-gray-700">{selectedModel.case_study}</p>
+                  </div>
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Model Details */}
-        <div className="lg:col-span-1">
-          {selectedModel ? (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8"
-            >
-              <h2 className="text-xl font-semibold mb-4">{selectedModel.name}</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-2">Description</h3>
-                  <p className="text-sm text-gray-700">{selectedModel.description}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-2">Case Study</h3>
-                  <p className="text-sm text-gray-700">{selectedModel.case_study || 'No case study available'}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-2">Best Used For</h3>
-                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                    {selectedModel.application_scenarios.map((scenario, index) => (
-                      <li key={index}>{scenario}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-2">Limitations</h3>
-                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                    {selectedModel.limitations && selectedModel.limitations.length > 0 ? (
-                      selectedModel.limitations.map((limitation, index) => (
-                        <li key={index}>{limitation}</li>
-                      ))
-                    ) : (
-                      <li>No specific limitations documented</li>
-                    )}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-2">Performance Metrics</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-gray-600">Accuracy:</span>
-                      <div className="font-medium">{selectedModel.performance_metrics.accuracy}%</div>
+            <div className="space-y-6">
+              <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
+                <h3 className="text-lg font-medium text-blue-900 mb-4">Performance Metrics</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-blue-800">Accuracy</span>
+                      <span className="font-medium text-blue-900">{selectedModel.performance_metrics.accuracy}%</span>
                     </div>
-                    <div>
-                      <span className="text-gray-600">Relevance:</span>
-                      <div className="font-medium">{selectedModel.performance_metrics.relevance_score}%</div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${selectedModel.performance_metrics.accuracy}%` }}
+                      />
                     </div>
-                    <div>
-                      <span className="text-gray-600">Usage:</span>
-                      <div className="font-medium">{selectedModel.performance_metrics.usage_count}</div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-blue-800">Success Rate</span>
+                      <span className="font-medium text-blue-900">{selectedModel.performance_metrics.success_rate}%</span>
                     </div>
-                    <div>
-                      <span className="text-gray-600">Success:</span>
-                      <div className="font-medium">{selectedModel.performance_metrics.success_rate}%</div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${selectedModel.performance_metrics.success_rate}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-blue-800">Relevance Score</span>
+                      <span className="font-medium text-blue-900">{selectedModel.performance_metrics.relevance_score}%</span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${selectedModel.performance_metrics.relevance_score}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2 border-t border-blue-200">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-blue-800">Usage Count</span>
+                      <span className="font-medium text-blue-900">{selectedModel.performance_metrics.usage_count.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
-
-                <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Use This Model
-                </button>
               </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Best Used For</h3>
+                <ul className="space-y-2">
+                  {selectedModel.application_scenarios.map((scenario, index) => (
+                    <li key={index} className="flex items-start">
+                      <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700">{scenario}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Not Recommended For</h3>
+                <ul className="space-y-2">
+                  {selectedModel.limitations.map((limitation, index) => (
+                    <li key={index} className="flex items-start">
+                      <XCircleIcon className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700">{limitation}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        <div>
+          {filteredModels.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center"
+            >
+              <BookOpenIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">No mental models found matching your filters.</p>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setCategoryFilter('all');
+                  setComplexityFilter('all');
+                }}
+                className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-500"
+              >
+                Clear Filters
+              </button>
             </motion.div>
           ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-              <BookOpenIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Select a mental model to view details</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filteredModels.map((model, index) => (
+                <motion.div
+                  key={model.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.05 * index }}
+                  className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => handleModelClick(model)}
+                >
+                  <div className="p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium text-gray-900">{model.name}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs ${getCategoryColor(model.category)}`}>
+                        {model.category}
+                      </span>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">{model.description}</p>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Complexity:</span>
+                      <span className={`px-2 py-1 rounded-full text-xs ${getComplexityColor(model.complexity_score)}`}>
+                        {model.complexity_score}/10
+                      </span>
+                    </div>
+                    
+                    <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <div className="flex items-center">
+                        <ChartBarIcon className="h-4 w-4 text-blue-500 mr-1" />
+                        <span className="text-xs text-gray-500">{model.performance_metrics.success_rate}% success</span>
+                      </div>
+                      <div className="flex items-center text-blue-600 hover:text-blue-800">
+                        <span className="text-xs font-medium">Details</span>
+                        <ArrowsPointingOutIcon className="ml-1 h-3 w-3" />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 };
