@@ -483,6 +483,12 @@ Provide comprehensive predictive analysis:
 5. Correlation matrix for different events
 6. Scenario analysis (best/worst/base case)
 
+Use quantitative methods:
+- Time series analysis with external factors
+- Machine learning ensemble methods
+- Bayesian updating with new information
+- Causal inference techniques
+
 Return ONLY valid JSON:
 {
   "predictions": [
@@ -632,7 +638,7 @@ Return ONLY valid JSON:
   "recommendations": ["string array - response options"]
 }`;
 
-    const response = await this.callGeminiAPI(prompt);
+    const response = await this.callGeminiAPI(prompt, { temperature: 0.3 });
     return JSON.parse(response);
   }
 
